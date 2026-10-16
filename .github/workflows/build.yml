@@ -1,9 +1,12 @@
-name: Build Kryn UI APK
+name: Build and Publish Kryn UI APK
 
 on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -26,8 +29,16 @@ jobs:
       - name: Build APK
         run: gradle assembleDebug --stacktrace
 
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+      - name: Rename APK for Direct Download
+        run: |
+          mkdir -p release_output
+          cp app/build/outputs/apk/debug/*.apk release_output/kryn-ui.apk
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          name: kryn-ui-debug
-          path: app/build/outputs/apk/debug/*.apk
+          tag_name: latest
+          name: "Kryn UI Latest Build"
+          files: release_output/kryn-ui.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
