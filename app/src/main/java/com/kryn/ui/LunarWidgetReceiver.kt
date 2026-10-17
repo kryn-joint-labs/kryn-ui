@@ -48,8 +48,8 @@ class LunarWidgetReceiver : AppWidgetProvider() {
         val dateBmp = renderTextToBitmap(
             text = dateText,
             typeface = aquaticoTf,
-            textSizeDp = 10.5f,
-            letterSpacing = 0.16f,
+            textSizeDp = 5.5f,
+            letterSpacing = 0.26f,
             textColor = 0xE6FFFFFF.toInt(),
             shadowColor = 0x88000000.toInt()
         )
