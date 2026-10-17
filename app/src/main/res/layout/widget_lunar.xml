@@ -17,15 +17,17 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- MINIMALIST ACCENT LINE BETWEEN DAY & DATE -->
-    <View
+    <!-- 2. MINIMALIST DIVIDER LINE (USING LEGAL IMAGEVIEW INSTEAD OF PROHIBITED VIEW) -->
+    <ImageView
+        android:id="@+id/mond_divider"
         android:layout_width="38dp"
         android:layout_height="1dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
-        android:background="#4DFFFFFF" />
+        android:src="@drawable/widget_line"
+        android:scaleType="fitXY" />
 
-    <!-- 2. DATE (AQUATICO GEOMETRIC FONT BITMAP) -->
+    <!-- 3. DATE (AQUATICO GEOMETRIC FONT BITMAP - DELICATE SCALE) -->
     <ImageView
         android:id="@+id/mond_date_img"
         android:layout_width="match_parent"
@@ -33,7 +35,7 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- 3. LIVE REAL-TIME SECOND TICKER -->
+    <!-- 4. LIVE REAL-TIME SECOND TICKER -->
     <TextClock
         android:id="@+id/mond_time_clock"
         android:layout_width="wrap_content"
