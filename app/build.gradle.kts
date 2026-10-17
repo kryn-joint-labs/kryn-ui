@@ -57,4 +57,6 @@ dependencies {
 
     // Glance (The Native Widget Engine)
     implementation("androidx.glance:glance-appwidget:1.0.0")
+
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }
