@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -24,11 +25,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import coil.compose.AsyncImage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Removes any default system window bar / decor
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             KrynStorefrontApp()
         }
@@ -57,36 +61,36 @@ fun KrynStorefrontApp() {
     )
 
     Scaffold(
-        containerColor = Color(0xFF090A0F)
+        containerColor = Color(0xFFF7F8FA) // Clean, modern ceramic light canvas
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = 40.dp)
+            contentPadding = PaddingValues(top = 40.dp, bottom = 48.dp)
         ) {
-            // 1. TOP NAV BAR
+            // 1. TOP BRAND ROW
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text(
                             text = "KRYN UI",
-                            color = Color.White,
-                            fontSize = 20.sp,
+                            color = Color(0xFF111218),
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Black,
                             letterSpacing = 2.sp,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
                             text = "BY KRYN JOINT LABS",
-                            color = Color(0xFFE10600),
-                            fontSize = 9.sp,
+                            color = Color(0xFFE10600), // Racing red accent
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp,
                             fontFamily = FontFamily.Monospace
@@ -95,16 +99,16 @@ fun KrynStorefrontApp() {
 
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF161820))
-                            .border(1.dp, Color(0x33FFFFFF), CircleShape),
+                            .background(Color.White)
+                            .border(1.dp, Color(0xFFE5E7EB), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "01",
-                            color = Color.White,
-                            fontSize = 11.sp,
+                            color = Color(0xFF111218),
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
@@ -112,15 +116,16 @@ fun KrynStorefrontApp() {
                 }
             }
 
-            // 2. HERO SHOWCASE CARD (Landscape Desk-Mat Style)
+            // 2. HERO SHOWCASE CARD (Light Aesthetic)
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .height(240.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .border(1.dp, Color(0x22FFFFFF), RoundedCornerShape(20.dp))
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .height(230.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White)
+                        .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(24.dp))
                 ) {
                     AsyncImage(
                         model = "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1200&q=80",
@@ -129,18 +134,17 @@ fun KrynStorefrontApp() {
                         modifier = Modifier.fillMaxSize()
                     )
 
-                    // Dark Vignette Gradient
+                    // Light frosted gradient fade at bottom
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
                                 Brush.verticalGradient(
-                                    listOf(Color.Transparent, Color(0xDD090A0F))
+                                    listOf(Color.Transparent, Color(0xE6FFFFFF))
                                 )
                             )
                     )
 
-                    // Content overlay
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -148,12 +152,12 @@ fun KrynStorefrontApp() {
                     ) {
                         Box(
                             modifier = Modifier
-                                .background(Color(0x33E10600), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                .background(Color(0xFFE10600), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = "DESKTOP PRECISION // ON MOBILE",
-                                color = Color(0xFFFF4D4D),
+                                color = Color.White,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp,
@@ -161,49 +165,51 @@ fun KrynStorefrontApp() {
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
-                            text = "복잡한 화면 속,\n공간은 더 날카로워야 하니까.",
-                            color = Color.White,
+                            text = "APP UNDER CONSTRUCTION",
+                            color = Color(0xFF111218),
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            lineHeight = 26.sp
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 0.5.sp,
+                            fontFamily = FontFamily.Monospace
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
-                            text = "Engineered for creators, racers and minimalists.",
-                            color = Color(0xFFAAAAAA),
-                            fontSize = 11.sp
+                            text = "Engineered for creators, racers, and minimalists.",
+                            color = Color(0xFF6B7280),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
 
-            // 3. CATEGORIES SECTION (Horizontal Scroll)
+            // 3. CATEGORIES SECTION
             item {
-                Column(modifier = Modifier.padding(top = 28.dp)) {
+                Column(modifier = Modifier.padding(top = 24.dp)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                            .padding(horizontal = 24.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "EXPLORE BY STYLE",
-                            color = Color.White,
-                            fontSize = 12.sp,
+                            color = Color(0xFF111218),
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.5.sp,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
                             text = "ALL CATEGORIES →",
-                            color = Color(0xFF8E8E93),
-                            fontSize = 10.sp,
+                            color = Color(0xFF9CA3AF),
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace
                         )
@@ -214,42 +220,40 @@ fun KrynStorefrontApp() {
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(categories) { item ->
-                            CategoryCard(item)
+                            CategoryCardLight(item)
                         }
                     }
                 }
             }
 
-            // 4. SIGNATURE WIDGET DROPS
+            // 4. SIGNATURE DROPS HEADER
             item {
-                Column(modifier = Modifier.padding(top = 28.dp)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "SIGNATURE DROPS",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.5.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Text(
-                            text = "v1.0 ACTIVE",
-                            color = Color(0xFFE10600),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 18.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "SIGNATURE DROPS",
+                        color = Color(0xFF111218),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Text(
+                        text = "v1.0 ACTIVE",
+                        color = Color(0xFFE10600),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
                 }
             }
 
-            // 5. WIDGET GRID / CARDS
+            // 5. WIDGET GRID (Two columns, light cards)
             items(widgetShowcase.chunked(2)) { pair ->
                 Row(
                     modifier = Modifier
@@ -259,7 +263,7 @@ fun KrynStorefrontApp() {
                 ) {
                     pair.forEach { widget ->
                         Box(modifier = Modifier.weight(1f)) {
-                            WidgetShowcaseCard(widget)
+                            WidgetShowcaseCardLight(widget)
                         }
                     }
                     if (pair.size == 1) {
@@ -267,18 +271,54 @@ fun KrynStorefrontApp() {
                     }
                 }
             }
+
+            // 6. BOTTOM BRAND FOOTER
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp, bottom = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(2.dp)
+                            .background(Color(0xFFE5E7EB))
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Made by Eveleske",
+                        color = Color(0xFF111218),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "From the Community to the Community",
+                        color = Color(0xFF9CA3AF),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.5.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun CategoryCard(item: CategoryItem) {
+fun CategoryCardLight(item: CategoryItem) {
     Box(
         modifier = Modifier
-            .width(170.dp)
+            .width(160.dp)
             .height(110.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, Color(0x22FFFFFF), RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(18.dp))
             .clickable { }
     ) {
         AsyncImage(
@@ -290,7 +330,11 @@ fun CategoryCard(item: CategoryItem) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0x99090A0F))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0x20000000), Color(0xCC000000))
+                    )
+                )
         )
         Column(
             modifier = Modifier
@@ -317,7 +361,7 @@ fun CategoryCard(item: CategoryItem) {
                 )
                 Text(
                     text = item.subtitle,
-                    color = Color(0xFFAAAAAA),
+                    color = Color(0xFFE0E0E0),
                     fontSize = 9.sp,
                     fontFamily = FontFamily.Monospace
                 )
@@ -327,20 +371,20 @@ fun CategoryCard(item: CategoryItem) {
 }
 
 @Composable
-fun WidgetShowcaseCard(widget: WidgetItem) {
+fun WidgetShowcaseCardLight(widget: WidgetItem) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF10121A))
-            .border(1.dp, Color(0x1AFFFFFF), RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color.White)
+            .border(1.dp, Color(0xFFE5E7EB), RoundedCornerShape(18.dp))
             .padding(10.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(12.dp))
         ) {
             AsyncImage(
                 model = widget.imageUrl,
@@ -350,19 +394,14 @@ fun WidgetShowcaseCard(widget: WidgetItem) {
             )
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x40000000))
-            )
-            Box(
-                modifier = Modifier
                     .padding(6.dp)
-                    .background(Color(0xCC090A0F), RoundedCornerShape(4.dp))
+                    .background(Color(0xE6FFFFFF), RoundedCornerShape(6.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
                     .align(Alignment.TopStart)
             ) {
                 Text(
                     text = widget.tag,
-                    color = Color.White,
+                    color = Color(0xFF111218),
                     fontSize = 8.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
@@ -374,7 +413,7 @@ fun WidgetShowcaseCard(widget: WidgetItem) {
 
         Text(
             text = widget.name,
-            color = Color.White,
+            color = Color(0xFF111218),
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace
@@ -389,7 +428,7 @@ fun WidgetShowcaseCard(widget: WidgetItem) {
         ) {
             Text(
                 text = widget.author,
-                color = Color(0xFF777777),
+                color = Color(0xFF9CA3AF),
                 fontSize = 9.sp,
                 fontFamily = FontFamily.Monospace
             )
