@@ -5,8 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -53,7 +51,6 @@ val CleanSansFont = FontFamily(Typeface.create("sans-serif-medium", Typeface.NOR
 data class CategoryItem(val id: String, val title: String, val subtitle: String, val imageUrl: String)
 data class WidgetItem(val name: String, val tag: String, val format: String, val category: String, val imageUrl: String)
 
-// Navigation state destinations
 sealed class Screen {
     object Home : Screen()
     object AllCategories : Screen()
@@ -73,7 +70,6 @@ fun KrynStorefrontApp() {
         )
     }
 
-    // Single source of verified widgets: Mond tribute is KRYN // LUNAR
     val signatureWidgets = remember {
         listOf(
             WidgetItem(
@@ -86,7 +82,7 @@ fun KrynStorefrontApp() {
         )
     }
 
-    // Android hardware back-button handling
+    // Android hardware back-button handler
     BackHandler(enabled = currentScreen !is Screen.Home) {
         currentScreen = when (currentScreen) {
             is Screen.CategoryDetail -> Screen.AllCategories
@@ -139,7 +135,7 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 44.dp, bottom = 48.dp)
     ) {
-        // TOP BRAND HEADER
+        // BRAND HEADER
         item {
             Row(
                 modifier = Modifier
@@ -266,7 +262,7 @@ fun HomeScreen(
             }
         }
 
-        // EXPLORE BY STYLE ROW
+        // EXPLORE BY STYLE
         item {
             Column(modifier = Modifier.padding(top = 24.dp)) {
                 Row(
@@ -301,7 +297,7 @@ fun HomeScreen(
                     contentPadding = PaddingValues(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    itemsIndexed(categories) { _, item ->
+                    items(items = categories) { item ->
                         CategoryCard(item = item, onClick = { onSelectCategory(item) })
                     }
                 }
@@ -335,8 +331,8 @@ fun HomeScreen(
             }
         }
 
-        // REAL WIDGET DROPS
-        itemsIndexed(signatureWidgets) { _, widget ->
+        // REAL WIDGET DROP
+        items(items = signatureWidgets) { widget ->
             Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
                 RealWidgetCard(widget = widget)
             }
@@ -382,7 +378,7 @@ fun HomeScreen(
 }
 
 // ==========================================
-// 2. ALL CATEGORIES DIRECTORY SCREEN
+// 2. ALL CATEGORIES SCREEN
 // ==========================================
 @Composable
 fun AllCategoriesScreen(
@@ -427,7 +423,7 @@ fun AllCategoriesScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 30.dp)
         ) {
-            items(categories) { item ->
+            items(items = categories) { item ->
                 CategoryCard(item = item, onClick = { onSelectCategory(item) }, modifier = Modifier.fillMaxWidth().height(150.dp))
             }
         }
@@ -435,7 +431,7 @@ fun AllCategoriesScreen(
 }
 
 // ==========================================
-// 3. CATEGORY DETAIL SCREEN (With Empty State)
+// 3. CATEGORY DETAIL SCREEN
 // ==========================================
 @Composable
 fun CategoryDetailScreen(
@@ -475,7 +471,6 @@ fun CategoryDetailScreen(
         }
 
         if (widgets.isEmpty()) {
-            // FUNNY EMPTY STATE NOTICE
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -525,7 +520,7 @@ fun CategoryDetailScreen(
                 contentPadding = PaddingValues(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(widgets) { widget ->
+                items(items = widgets) { widget ->
                     RealWidgetCard(widget = widget)
                 }
             }
@@ -534,7 +529,7 @@ fun CategoryDetailScreen(
 }
 
 // ==========================================
-// REUSABLE COMPONENTS
+// REUSABLE CARDS & FOOTER
 // ==========================================
 @Composable
 fun CategoryCard(
@@ -621,14 +616,12 @@ fun RealWidgetCard(widget: WidgetItem) {
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Scrim
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(0x55000000))
             )
 
-            // Mond preview reproduction
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -698,7 +691,7 @@ fun RealWidgetCard(widget: WidgetItem) {
             }
 
             Button(
-                onClick = { /* Will trigger widget pinning */ },
+                onClick = { },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F1117)),
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
