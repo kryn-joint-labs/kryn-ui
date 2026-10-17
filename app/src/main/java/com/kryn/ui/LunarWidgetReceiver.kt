@@ -21,7 +21,6 @@ class LunarWidgetReceiver : AppWidgetProvider() {
         val dayText = SimpleDateFormat("EEEE", Locale.US).format(now).uppercase()
         val dateText = SimpleDateFormat("d MMMM, yyyy.", Locale.US).format(now).uppercase()
 
-        // Load Anurati & Aquatico directly from assets
         val anuratiTf = try {
             Typeface.createFromAsset(context.assets, "fonts/anurati.otf")
         } catch (e: Exception) {
@@ -34,7 +33,7 @@ class LunarWidgetReceiver : AppWidgetProvider() {
             Typeface.SANS_SERIF
         }
 
-        // 1. Hero Day Bitmap (Wide, prominent stencil)
+        // 1. Hero Day (Prominent, wide stencil)
         val dayBmp = renderTextToBitmap(
             text = dayText,
             typeface = anuratiTf,
@@ -44,7 +43,7 @@ class LunarWidgetReceiver : AppWidgetProvider() {
             shadowColor = 0xAA000000.toInt()
         )
 
-        // 2. Date Bitmap (Scaled down, elegant, delicate proportion)
+        // 2. Date Bitmap (Delicate 10.5f scale, strictly under 50% of Day)
         val dateBmp = renderTextToBitmap(
             text = dateText,
             typeface = aquaticoTf,
@@ -82,8 +81,10 @@ class LunarWidgetReceiver : AppWidgetProvider() {
 
         val fontMetrics = paint.fontMetrics
         val textWidth = paint.measureText(text)
-        val width = (textWidth + 24f * density).toInt().coerceAtLeast(1)
-        val height = ((fontMetrics.bottom - fontMetrics.top) + 10f * density).toInt().coerceAtLeast(1)
+        
+        // Prevents Bitmap.createBitmap IllegalArgumentException crashes
+        val width = (textWidth + 24f * density).toInt().coerceAtLeast(32)
+        val height = ((fontMetrics.bottom - fontMetrics.top) + 12f * density).toInt().coerceAtLeast(16)
 
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
