@@ -1,7 +1,14 @@
 package com.kryn.ui
 
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -29,6 +36,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,7 +55,29 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Typography Tokens
+// Function to pin widget to home screen natively
+fun pinWidgetToHomeScreen(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val appWidgetManager = context.getSystemService(AppWidgetManager::class.java)
+        val myProvider = ComponentName(context, LunarWidgetReceiver::class.java)
+
+        if (appWidgetManager.isRequestPinAppWidgetSupported) {
+            val pinnedWidgetCallbackIntent = Intent(context, MainActivity::class.java)
+            val successCallback = PendingIntent.getActivity(
+                context,
+                0,
+                pinnedWidgetCallbackIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            appWidgetManager.requestPinAppWidget(myProvider, null, successCallback)
+        } else {
+            Toast.makeText(context, "Launcher does not support direct pinning. Long-press home screen.", Toast.LENGTH_LONG).show()
+        }
+    } else {
+        Toast.makeText(context, "Long-press your home screen to add widgets.", Toast.LENGTH_SHORT).show()
+    }
+}
+
 val CondensedDisplayFont = FontFamily(Typeface.create("sans-serif-condensed", Typeface.BOLD))
 val MonoBrandFont = FontFamily.Monospace
 val CleanSansFont = FontFamily(Typeface.create("sans-serif-medium", Typeface.NORMAL))
@@ -86,7 +116,6 @@ fun KrynStorefrontApp() {
         )
     }
 
-    // Android hardware back-button handler with reverse screen history
     BackHandler(enabled = currentScreen !is Screen.Home) {
         currentScreen = when (currentScreen) {
             is Screen.CategoryDetail -> Screen.AllCategories
@@ -101,12 +130,10 @@ fun KrynStorefrontApp() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // BUTTERY SCREEN TRANSITIONS (Slide + Fade + Subtle Scale)
             AnimatedContent(
                 targetState = currentScreen,
                 transitionSpec = {
                     if (targetState is Screen.CategoryDetail || (initialState is Screen.Home && targetState is Screen.AllCategories)) {
-                        // Forward push transition
                         (slideInHorizontally(
                             initialOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() },
                             animationSpec = tween(420, easing = FastOutSlowInEasing)
@@ -120,7 +147,6 @@ fun KrynStorefrontApp() {
                             ) + fadeOut(animationSpec = tween(280))
                         )
                     } else {
-                        // Return/Back transition
                         (slideInHorizontally(
                             initialOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
                             animationSpec = tween(400, easing = FastOutSlowInEasing)
@@ -166,9 +192,6 @@ fun KrynStorefrontApp() {
     }
 }
 
-// ==========================================
-// 1. HOME SCREEN (Fluid Cascading Entrance)
-// ==========================================
 @Composable
 fun HomeScreen(
     categories: List<CategoryItem>,
@@ -176,11 +199,12 @@ fun HomeScreen(
     onViewAllCategories: () -> Unit,
     onSelectCategory: (CategoryItem) -> Unit
 ) {
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 44.dp, bottom = 48.dp)
     ) {
-        // BRAND HEADER
         item {
             EntranceContainer(delay = 50) {
                 Row(
@@ -238,7 +262,6 @@ fun HomeScreen(
             }
         }
 
-        // HERO CARD WITH BUTTERY ZOOM-IN
         item {
             EntranceContainer(delay = 120) {
                 Box(
@@ -311,7 +334,6 @@ fun HomeScreen(
             }
         }
 
-        // EXPLORE BY STYLE
         item {
             EntranceContainer(delay = 180) {
                 Column(modifier = Modifier.padding(top = 24.dp)) {
@@ -357,7 +379,6 @@ fun HomeScreen(
             }
         }
 
-        // SIGNATURE DROPS HEADER
         item {
             EntranceContainer(delay = 250) {
                 Row(
@@ -386,16 +407,17 @@ fun HomeScreen(
             }
         }
 
-        // REAL WIDGET DROP
         itemsIndexed(signatureWidgets) { index, widget ->
             EntranceContainer(delay = 300 + (index * 70)) {
                 Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
-                    RealWidgetCard(widget = widget)
+                    RealWidgetCard(
+                        widget = widget,
+                        onApplyClick = { pinWidgetToHomeScreen(context) }
+                    )
                 }
             }
         }
 
-        // TEASER NEXT DROP CARD
         item {
             EntranceContainer(delay = 400) {
                 Box(
@@ -429,7 +451,6 @@ fun HomeScreen(
             }
         }
 
-        // FOOTER
         item {
             EntranceContainer(delay = 460) {
                 AppFooter()
@@ -438,9 +459,6 @@ fun HomeScreen(
     }
 }
 
-// ==========================================
-// 2. ALL CATEGORIES DIRECTORY SCREEN
-// ==========================================
 @Composable
 fun AllCategoriesScreen(
     categories: List<CategoryItem>,
@@ -503,15 +521,14 @@ fun AllCategoriesScreen(
     }
 }
 
-// ==========================================
-// 3. CATEGORY DETAIL SCREEN
-// ==========================================
 @Composable
 fun CategoryDetailScreen(
     category: CategoryItem,
     widgets: List<WidgetItem>,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -601,7 +618,10 @@ fun CategoryDetailScreen(
             ) {
                 itemsIndexed(widgets) { index, widget ->
                     EntranceContainer(delay = 120 + (index * 70)) {
-                        RealWidgetCard(widget = widget)
+                        RealWidgetCard(
+                            widget = widget,
+                            onApplyClick = { pinWidgetToHomeScreen(context) }
+                        )
                     }
                 }
             }
@@ -609,9 +629,6 @@ fun CategoryDetailScreen(
     }
 }
 
-// ==========================================
-// FEATHER ENTRANCE ANIMATOR CONTAINER
-// ==========================================
 @Composable
 fun EntranceContainer(
     delay: Int,
@@ -663,9 +680,6 @@ fun EntranceContainer(
     }
 }
 
-// ==========================================
-// REUSABLE CARDS & FOOTER
-// ==========================================
 @Composable
 fun CategoryCard(
     item: CategoryItem,
@@ -729,7 +743,10 @@ fun CategoryCard(
 }
 
 @Composable
-fun RealWidgetCard(widget: WidgetItem) {
+fun RealWidgetCard(
+    widget: WidgetItem,
+    onApplyClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -757,7 +774,6 @@ fun RealWidgetCard(widget: WidgetItem) {
                     .background(Color(0x55000000))
             )
 
-            // Mond preview reproduction
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -778,7 +794,7 @@ fun RealWidgetCard(widget: WidgetItem) {
                     fontFamily = MonoBrandFont
                 )
                 Text(
-                    text = "- 02:40 PM -",
+                    text = "- 09:44:00 PM -",
                     color = Color(0xAAFFFFFF),
                     fontSize = 9.sp,
                     letterSpacing = 1.sp,
@@ -827,7 +843,7 @@ fun RealWidgetCard(widget: WidgetItem) {
             }
 
             Button(
-                onClick = { },
+                onClick = { onApplyClick() },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F1117)),
                 shape = RoundedCornerShape(8.dp),
                 contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
