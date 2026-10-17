@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 1. DAY (ANURATI STENCIL FONT + WIDE TRACKING) -->
+    <TextView
+        android:id="@+id/mond_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="F R I D A Y"
+        android:textColor="#FFFFFF"
+        android:textSize="36sp"
+        android:fontFamily="@font/anurati"
+        android:letterSpacing="0.45"
+        android:shadowColor="#B3000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="8" />
+
+    <!-- 2. DATE (AQUATICO GEOMETRIC SANS) -->
+    <TextView
+        android:id="@+id/mond_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="17 OCTOBER, 2026."
+        android:textColor="#E6FFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="@font/aquatico"
+        android:letterSpacing="0.2"
+        android:shadowColor="#99000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="6" />
+
+    <!-- 3. TIME (- 03:15 PM -) -->
+    <TextView
+        android:id="@+id/mond_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="- 03:15 PM -"
+        android:textColor="#B3FFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="@font/aquatico"
+        android:letterSpacing="0.15"
+        android:shadowColor="#99000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="6" />
+
+</LinearLayout>
