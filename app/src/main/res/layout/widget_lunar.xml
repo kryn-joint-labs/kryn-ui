@@ -17,16 +17,23 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- 2. DATE (AQUATICO GEOMETRIC FONT BITMAP - DELICATE & PROPORTIONAL) -->
+    <!-- MINIMALIST DIVIDER LINE (BETWEEN DAY & DATE) -->
+    <View
+        android:layout_width="42dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="4dp"
+        android:background="#4DFFFFFF" />
+
+    <!-- 2. DATE (AQUATICO GEOMETRIC FONT BITMAP - STRICTLY <= 50% OF DAY) -->
     <ImageView
         android:id="@+id/mond_date_img"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- 3. LIVE REAL-TIME SECOND TICKER (0% BATTERY DRAIN) -->
+    <!-- 3. LIVE REAL-TIME SECOND TICKER -->
     <TextClock
         android:id="@+id/mond_time_clock"
         android:layout_width="wrap_content"
