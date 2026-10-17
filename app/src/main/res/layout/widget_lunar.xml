@@ -4,12 +4,12 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
-    <!-- 1. DAY (ANURATI FONT RENDERED DIRECTLY AS BITMAP) -->
+    <!-- 1. DAY (ANURATI STENCIL FONT BITMAP) -->
     <ImageView
         android:id="@+id/mond_day_img"
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- 2. DATE (AQUATICO FONT) -->
+    <!-- 2. DATE (AQUATICO GEOMETRIC FONT BITMAP - DELICATE & PROPORTIONAL) -->
     <ImageView
         android:id="@+id/mond_date_img"
         android:layout_width="match_parent"
@@ -26,13 +26,21 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- 3. TIME (AQUATICO FONT) -->
-    <ImageView
-        android:id="@+id/mond_time_img"
-        android:layout_width="match_parent"
+    <!-- 3. LIVE REAL-TIME SECOND TICKER (0% BATTERY DRAIN) -->
+    <TextClock
+        android:id="@+id/mond_time_clock"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter" />
+        android:format12Hour="'- 'hh:mm:ss a' -'"
+        android:format24Hour="'- 'HH:mm:ss' -'"
+        android:textColor="#CCFFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.16"
+        android:shadowColor="#99000000"
+        android:shadowDx="0"
+        android:shadowDy="1"
+        android:shadowRadius="5" />
 
 </LinearLayout>
