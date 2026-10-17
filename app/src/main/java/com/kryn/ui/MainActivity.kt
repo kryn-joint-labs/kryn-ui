@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,15 +15,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -82,7 +86,7 @@ fun KrynStorefrontApp() {
         )
     }
 
-    // Android hardware back-button handler
+    // Android hardware back-button handler with reverse screen history
     BackHandler(enabled = currentScreen !is Screen.Home) {
         currentScreen = when (currentScreen) {
             is Screen.CategoryDetail -> Screen.AllCategories
@@ -92,29 +96,70 @@ fun KrynStorefrontApp() {
     }
 
     Scaffold(containerColor = Color(0xFFF6F7FA)) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            when (val screen = currentScreen) {
-                is Screen.Home -> {
-                    HomeScreen(
-                        categories = categories,
-                        signatureWidgets = signatureWidgets,
-                        onViewAllCategories = { currentScreen = Screen.AllCategories },
-                        onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) }
-                    )
-                }
-                is Screen.AllCategories -> {
-                    AllCategoriesScreen(
-                        categories = categories,
-                        onBack = { currentScreen = Screen.Home },
-                        onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) }
-                    )
-                }
-                is Screen.CategoryDetail -> {
-                    CategoryDetailScreen(
-                        category = screen.category,
-                        widgets = signatureWidgets.filter { it.category.equals(screen.category.id, ignoreCase = true) },
-                        onBack = { currentScreen = Screen.AllCategories }
-                    )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // BUTTERY SCREEN TRANSITIONS (Slide + Fade + Subtle Scale)
+            AnimatedContent(
+                targetState = currentScreen,
+                transitionSpec = {
+                    if (targetState is Screen.CategoryDetail || (initialState is Screen.Home && targetState is Screen.AllCategories)) {
+                        // Forward push transition
+                        (slideInHorizontally(
+                            initialOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() },
+                            animationSpec = tween(420, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(380)) + scaleIn(
+                            initialScale = 0.94f,
+                            animationSpec = tween(420, easing = FastOutSlowInEasing)
+                        )).togetherWith(
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> (-fullWidth * 0.25f).toInt() },
+                                animationSpec = tween(350, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(280))
+                        )
+                    } else {
+                        // Return/Back transition
+                        (slideInHorizontally(
+                            initialOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
+                            animationSpec = tween(400, easing = FastOutSlowInEasing)
+                        ) + fadeIn(animationSpec = tween(380))).togetherWith(
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() },
+                                animationSpec = tween(350, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(260)) + scaleOut(
+                                targetScale = 0.95f,
+                                animationSpec = tween(350, easing = FastOutSlowInEasing)
+                            )
+                        )
+                    }
+                },
+                label = "ScreenTransition"
+            ) { targetScreen ->
+                when (targetScreen) {
+                    is Screen.Home -> {
+                        HomeScreen(
+                            categories = categories,
+                            signatureWidgets = signatureWidgets,
+                            onViewAllCategories = { currentScreen = Screen.AllCategories },
+                            onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) }
+                        )
+                    }
+                    is Screen.AllCategories -> {
+                        AllCategoriesScreen(
+                            categories = categories,
+                            onBack = { currentScreen = Screen.Home },
+                            onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) }
+                        )
+                    }
+                    is Screen.CategoryDetail -> {
+                        CategoryDetailScreen(
+                            category = targetScreen.category,
+                            widgets = signatureWidgets.filter { it.category.equals(targetScreen.category.id, ignoreCase = true) },
+                            onBack = { currentScreen = Screen.AllCategories }
+                        )
+                    }
                 }
             }
         }
@@ -122,7 +167,7 @@ fun KrynStorefrontApp() {
 }
 
 // ==========================================
-// 1. HOME SCREEN
+// 1. HOME SCREEN (Fluid Cascading Entrance)
 // ==========================================
 @Composable
 fun HomeScreen(
@@ -137,168 +182,176 @@ fun HomeScreen(
     ) {
         // BRAND HEADER
         item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "KRYN UI",
-                            color = Color(0xFF0F1117),
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.5.sp,
-                            fontFamily = CondensedDisplayFont
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFE10600))
-                        )
-                    }
-                    Text(
-                        text = "BY KRYN JOINT LABS // ENGINE v1.0",
-                        color = Color(0xFFE10600),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.8.sp,
-                        fontFamily = MonoBrandFont
-                    )
-                }
-
-                Box(
+            EntranceContainer(delay = 50) {
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White)
-                        .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 14.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "01 // DEV",
-                        color = Color(0xFF0F1117),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = MonoBrandFont
-                    )
-                }
-            }
-        }
-
-        // HERO CARD
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
-                    .height(260.dp)
-                    .clip(RoundedCornerShape(26.dp))
-                    .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(26.dp))
-            ) {
-                AsyncImage(
-                    model = "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=85",
-                    contentDescription = "Torii Scenery",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0x20000000), Color(0x990A0B10), Color(0xF2090A0F))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "KRYN UI",
+                                color = Color(0xFF0F1117),
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.5.sp,
+                                fontFamily = CondensedDisplayFont
                             )
-                        )
-                )
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(22.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFFE10600))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFE10600))
+                            )
+                        }
                         Text(
-                            text = "DESKTOP PRECISION // ON MOBILE",
-                            color = Color.White,
-                            fontSize = 9.sp,
+                            text = "BY KRYN JOINT LABS // ENGINE v1.0",
+                            color = Color(0xFFE10600),
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.2.sp,
+                            letterSpacing = 1.8.sp,
                             fontFamily = MonoBrandFont
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "01 // DEV",
+                            color = Color(0xFF0F1117),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MonoBrandFont
+                        )
+                    }
+                }
+            }
+        }
 
-                    Text(
-                        text = "APP UNDER CONSTRUCTION",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp,
-                        fontFamily = CondensedDisplayFont
+        // HERO CARD WITH BUTTERY ZOOM-IN
+        item {
+            EntranceContainer(delay = 120) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                        .height(260.dp)
+                        .clip(RoundedCornerShape(26.dp))
+                        .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(26.dp))
+                ) {
+                    AsyncImage(
+                        model = "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=85",
+                        contentDescription = "Torii Scenery",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = "Directly replicate PC widgets onto your phone.",
-                        color = Color(0xFFD1D5DB),
-                        fontSize = 12.sp,
-                        fontFamily = CleanSansFont
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(Color(0x20000000), Color(0x990A0B10), Color(0xF2090A0F))
+                                )
+                            )
                     )
+
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(22.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFFE10600))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "DESKTOP PRECISION // ON MOBILE",
+                                color = Color.White,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp,
+                                fontFamily = MonoBrandFont
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "APP UNDER CONSTRUCTION",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp,
+                            fontFamily = CondensedDisplayFont
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "Directly replicate PC widgets onto your phone.",
+                            color = Color(0xFFD1D5DB),
+                            fontSize = 12.sp,
+                            fontFamily = CleanSansFont
+                        )
+                    }
                 }
             }
         }
 
         // EXPLORE BY STYLE
         item {
-            Column(modifier = Modifier.padding(top = 24.dp)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "EXPLORE BY STYLE",
-                        color = Color(0xFF0F1117),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp,
-                        fontFamily = CondensedDisplayFont
-                    )
-                    Text(
-                        text = "ALL CATEGORIES →",
-                        color = Color(0xFFE10600),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = MonoBrandFont,
+            EntranceContainer(delay = 180) {
+                Column(modifier = Modifier.padding(top = 24.dp)) {
+                    Row(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .clickable { onViewAllCategories() }
-                            .padding(horizontal = 6.dp, vertical = 4.dp)
-                    )
-                }
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "EXPLORE BY STYLE",
+                            color = Color(0xFF0F1117),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp,
+                            fontFamily = CondensedDisplayFont
+                        )
+                        Text(
+                            text = "ALL CATEGORIES →",
+                            color = Color(0xFFE10600),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MonoBrandFont,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { onViewAllCategories() }
+                                .padding(horizontal = 6.dp, vertical = 4.dp)
+                        )
+                    }
 
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    items(items = categories) { item ->
-                        CategoryCard(item = item, onClick = { onSelectCategory(item) })
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        itemsIndexed(categories) { index, item ->
+                            EntranceContainer(delay = 200 + (index * 60)) {
+                                CategoryCard(item = item, onClick = { onSelectCategory(item) })
+                            }
+                        }
                     }
                 }
             }
@@ -306,79 +359,87 @@ fun HomeScreen(
 
         // SIGNATURE DROPS HEADER
         item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "SIGNATURE DROPS",
-                    color = Color(0xFF0F1117),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp,
-                    fontFamily = CondensedDisplayFont
-                )
-                Text(
-                    text = "v1.0 ACTIVE",
-                    color = Color(0xFFE10600),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = MonoBrandFont
-                )
+            EntranceContainer(delay = 250) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "SIGNATURE DROPS",
+                        color = Color(0xFF0F1117),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        fontFamily = CondensedDisplayFont
+                    )
+                    Text(
+                        text = "v1.0 ACTIVE",
+                        color = Color(0xFFE10600),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MonoBrandFont
+                    )
+                }
             }
         }
 
         // REAL WIDGET DROP
-        items(items = signatureWidgets) { widget ->
-            Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
-                RealWidgetCard(widget = widget)
+        itemsIndexed(signatureWidgets) { index, widget ->
+            EntranceContainer(delay = 300 + (index * 70)) {
+                Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+                    RealWidgetCard(widget = widget)
+                }
             }
         }
 
         // TEASER NEXT DROP CARD
         item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFFEAECEF))
-                    .border(1.dp, Color(0xFFD8DCE3), RoundedCornerShape(20.dp))
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "DROP // 02 IN PRODUCTION",
-                        color = Color(0xFF0F1117),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = CondensedDisplayFont,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Next release drop syncing soon from Kryn Joint Labs.",
-                        color = Color(0xFF6B7280),
-                        fontSize = 11.sp,
-                        fontFamily = CleanSansFont
-                    )
+            EntranceContainer(delay = 400) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFFEAECEF))
+                        .border(1.dp, Color(0xFFD8DCE3), RoundedCornerShape(20.dp))
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "DROP // 02 IN PRODUCTION",
+                            color = Color(0xFF0F1117),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = CondensedDisplayFont,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Next release drop syncing soon from Kryn Joint Labs.",
+                            color = Color(0xFF6B7280),
+                            fontSize = 11.sp,
+                            fontFamily = CleanSansFont
+                        )
+                    }
                 }
             }
         }
 
         // FOOTER
         item {
-            AppFooter()
+            EntranceContainer(delay = 460) {
+                AppFooter()
+            }
         }
     }
 }
 
 // ==========================================
-// 2. ALL CATEGORIES SCREEN
+// 2. ALL CATEGORIES DIRECTORY SCREEN
 // ==========================================
 @Composable
 fun AllCategoriesScreen(
@@ -391,30 +452,34 @@ fun AllCategoriesScreen(
             .fillMaxSize()
             .padding(top = 44.dp, start = 20.dp, end = 20.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "← BACK TO LAB",
-                color = Color(0xFFE10600),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = MonoBrandFont,
+        EntranceContainer(delay = 50) {
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .clickable { onBack() }
-                    .padding(8.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "STYLE DIRECTORY",
-                color = Color(0xFF0F1117),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.5.sp,
-                fontFamily = CondensedDisplayFont
-            )
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "← BACK TO LAB",
+                    color = Color(0xFFE10600),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MonoBrandFont,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onBack() }
+                        .padding(8.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "STYLE DIRECTORY",
+                    color = Color(0xFF0F1117),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp,
+                    fontFamily = CondensedDisplayFont
+                )
+            }
         }
 
         LazyVerticalGrid(
@@ -423,8 +488,16 @@ fun AllCategoriesScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 30.dp)
         ) {
-            items(items = categories) { item ->
-                CategoryCard(item = item, onClick = { onSelectCategory(item) }, modifier = Modifier.fillMaxWidth().height(150.dp))
+            itemsIndexed(categories) { index, item ->
+                EntranceContainer(delay = 100 + (index * 60)) {
+                    CategoryCard(
+                        item = item,
+                        onClick = { onSelectCategory(item) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                    )
+                }
             }
         }
     }
@@ -444,30 +517,34 @@ fun CategoryDetailScreen(
             .fillMaxSize()
             .padding(top = 44.dp, start = 20.dp, end = 20.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "← DIRECTORY",
-                color = Color(0xFFE10600),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = MonoBrandFont,
+        EntranceContainer(delay = 50) {
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .clickable { onBack() }
-                    .padding(8.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = category.title,
-                color = Color(0xFF0F1117),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp,
-                fontFamily = CondensedDisplayFont
-            )
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "← DIRECTORY",
+                    color = Color(0xFFE10600),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MonoBrandFont,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onBack() }
+                        .padding(8.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = category.title,
+                    color = Color(0xFF0F1117),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp,
+                    fontFamily = CondensedDisplayFont
+                )
+            }
         }
 
         if (widgets.isEmpty()) {
@@ -477,41 +554,43 @@ fun CategoryDetailScreen(
                     .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(24.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFEAECEF)),
-                        contentAlignment = Alignment.Center
+                EntranceContainer(delay = 120) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(24.dp)
                     ) {
-                        Text(text = "☕", fontSize = 28.sp)
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFEAECEF)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "☕", fontSize = 28.sp)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "NOTHING COOKING HERE YET",
+                            color = Color(0xFF0F1117),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = CondensedDisplayFont,
+                            letterSpacing = 1.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = "Engineers are aggressively typing and refueling on caffeine. Check back on the next release drop!",
+                            color = Color(0xFF6B7280),
+                            fontSize = 12.sp,
+                            fontFamily = CleanSansFont,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 18.sp
+                        )
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "NOTHING COOKING HERE YET",
-                        color = Color(0xFF0F1117),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = CondensedDisplayFont,
-                        letterSpacing = 1.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Text(
-                        text = "Engineers are aggressively typing and refueling on caffeine. Check back on the next release drop!",
-                        color = Color(0xFF6B7280),
-                        fontSize = 12.sp,
-                        fontFamily = CleanSansFont,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 18.sp
-                    )
                 }
             }
         } else {
@@ -520,11 +599,67 @@ fun CategoryDetailScreen(
                 contentPadding = PaddingValues(vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(items = widgets) { widget ->
-                    RealWidgetCard(widget = widget)
+                itemsIndexed(widgets) { index, widget ->
+                    EntranceContainer(delay = 120 + (index * 70)) {
+                        RealWidgetCard(widget = widget)
+                    }
                 }
             }
         }
+    }
+}
+
+// ==========================================
+// FEATHER ENTRANCE ANIMATOR CONTAINER
+// ==========================================
+@Composable
+fun EntranceContainer(
+    delay: Int,
+    content: @Composable () -> Unit
+) {
+    var isVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            delayMillis = delay,
+            easing = FastOutSlowInEasing
+        ),
+        label = "AlphaAnim"
+    )
+
+    val animatedTranslateY by animateFloatAsState(
+        targetValue = if (isVisible) 0f else 32f,
+        animationSpec = tween(
+            durationMillis = 550,
+            delayMillis = delay,
+            easing = FastOutSlowInEasing
+        ),
+        label = "TranslateAnim"
+    )
+
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0.97f,
+        animationSpec = tween(
+            durationMillis = 550,
+            delayMillis = delay,
+            easing = FastOutSlowInEasing
+        ),
+        label = "ScaleAnim"
+    )
+
+    Box(
+        modifier = Modifier
+            .offset(y = animatedTranslateY.dp)
+            .scale(animatedScale)
+            .alpha(animatedAlpha)
+    ) {
+        content()
     }
 }
 
@@ -622,6 +757,7 @@ fun RealWidgetCard(widget: WidgetItem) {
                     .background(Color(0x55000000))
             )
 
+            // Mond preview reproduction
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally
