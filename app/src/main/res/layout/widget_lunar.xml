@@ -17,15 +17,15 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter" />
 
-    <!-- MINIMALIST DIVIDER LINE (BETWEEN DAY & DATE) -->
+    <!-- MINIMALIST ACCENT LINE BETWEEN DAY & DATE -->
     <View
-        android:layout_width="42dp"
+        android:layout_width="38dp"
         android:layout_height="1dp"
         android:layout_marginTop="5dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="5dp"
         android:background="#4DFFFFFF" />
 
-    <!-- 2. DATE (AQUATICO GEOMETRIC FONT BITMAP - STRICTLY <= 50% OF DAY) -->
+    <!-- 2. DATE (AQUATICO GEOMETRIC FONT BITMAP) -->
     <ImageView
         android:id="@+id/mond_date_img"
         android:layout_width="match_parent"
