@@ -28,7 +28,8 @@
                 android:format24Hour="kk:mm"
                 android:textColor="#33FFFFFF"
                 android:textSize="86sp"
-                android:fontFamily="@font/clock_digits"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
                 android:includeFontPadding="false" />
 
             <!-- 2. AM/PM INDICATOR (PINNED TO THE RIGHT OF NUMBERS) -->
@@ -44,7 +45,7 @@
                 android:format24Hour=""
                 android:textColor="#55FFFFFF"
                 android:textSize="12sp"
-                android:fontFamily="@font/sans_meta"
+                android:fontFamily="sans-serif-medium"
                 android:includeFontPadding="false" />
 
             <!-- 3. SCRIPT DAY OVERLAY (PERMANENT LAVENDER #B84DFF) -->
