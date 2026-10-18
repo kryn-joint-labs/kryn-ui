@@ -122,6 +122,7 @@ sealed class Screen {
 
 @Composable
 fun KrynStorefrontApp() {
+    val context = LocalContext.current
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Home) }
 
     val categories = remember {
@@ -193,7 +194,7 @@ fun KrynStorefrontApp() {
                                 if (widget.name.contains("VELVET", ignoreCase = true)) {
                                     currentScreen = Screen.VelvetCustomizer(widget)
                                 } else {
-                                    pinWidgetToHomeScreen(context = null ?: LocalContext.current, widget.name)
+                                    pinWidgetToHomeScreen(context, widget.name)
                                 }
                             }
                         )
@@ -214,7 +215,7 @@ fun KrynStorefrontApp() {
                                 if (widget.name.contains("VELVET", ignoreCase = true)) {
                                     currentScreen = Screen.VelvetCustomizer(widget)
                                 } else {
-                                    pinWidgetToHomeScreen(context = null ?: LocalContext.current, widget.name)
+                                    pinWidgetToHomeScreen(context, widget.name)
                                 }
                             }
                         )
@@ -428,7 +429,6 @@ fun VelvetCustomizerScreen(
                         .putLong("velvet_color_time", selectedTimeColor)
                         .apply()
 
-                    // Broadcast immediately to update widget on home screen
                     val updateIntent = Intent(context, VelvetWidgetReceiver::class.java).apply {
                         action = VelvetWidgetReceiver.ACTION_MINUTE_TICK
                     }
