@@ -55,10 +55,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun pinWidgetToHomeScreen(context: Context) {
+fun pinWidgetToHomeScreen(context: Context, widgetName: String) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val appWidgetManager = context.getSystemService(AppWidgetManager::class.java)
-        val myProvider = ComponentName(context, LunarWidgetReceiver::class.java)
+        val receiverClass = if (widgetName.contains("VELVET", ignoreCase = true)) {
+            VelvetWidgetReceiver::class.java
+        } else {
+            LunarWidgetReceiver::class.java
+        }
+        val myProvider = ComponentName(context, receiverClass)
 
         if (appWidgetManager.isRequestPinAppWidgetSupported) {
             val pinnedWidgetCallbackIntent = Intent(context, MainActivity::class.java)
@@ -103,18 +108,7 @@ fun KrynStorefrontApp() {
         )
     }
 
-    val signatureWidgets = remember {
-        listOf(
-            WidgetItem(
-                name = "KRYN // LUNAR",
-                tag = "STENCIL CHRONO",
-                format = "4x2 // REVISION 1.2",
-                category = "minimal",
-                imageUrl = "https://i.ibb.co/PvLzfMXP/IMG-20261018-092126.jpg"
-            )
-        )
-    }
-
+    // Only ONE declaration of signatureWidgets containing both widgets
     val signatureWidgets = remember {
         listOf(
             WidgetItem(
@@ -397,7 +391,6 @@ fun HomeScreen(
             }
         }
 
-        // SIGNATURE DROPS ROW WITH "v1.2 ACTIVE"
         item {
             EntranceContainer(delay = 250) {
                 Row(
@@ -431,7 +424,7 @@ fun HomeScreen(
                 Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
                     RealWidgetCard(
                         widget = widget,
-                        onApplyClick = { pinWidgetToHomeScreen(context) }
+                        onApplyClick = { pinWidgetToHomeScreen(context, widget.name) }
                     )
                 }
             }
@@ -451,7 +444,7 @@ fun HomeScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "DROP // 02 IN PRODUCTION",
+                            text = "DROP // 03 IN PRODUCTION",
                             color = Color(0xFF0F1117),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -639,7 +632,7 @@ fun CategoryDetailScreen(
                     EntranceContainer(delay = 120 + (index * 70)) {
                         RealWidgetCard(
                             widget = widget,
-                            onApplyClick = { pinWidgetToHomeScreen(context) }
+                            onApplyClick = { pinWidgetToHomeScreen(context, widget.name) }
                         )
                     }
                 }
@@ -774,7 +767,6 @@ fun RealWidgetCard(
             .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(22.dp))
             .padding(14.dp)
     ) {
-        // Thumbnail container showing the real preview image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
