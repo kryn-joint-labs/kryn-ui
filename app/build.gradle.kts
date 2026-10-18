@@ -15,6 +15,14 @@ android {
         versionName = "1.2"
     }
 
+signingConfigs {
+        create("permanentSigning") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+
     buildTypes {
         release {
             isMinifyEnabled = false
