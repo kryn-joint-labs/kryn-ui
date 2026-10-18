@@ -650,52 +650,57 @@
     </div>
   </section>
 
- <!-- Download Handler & Live GitHub API Counter -->
+<!-- Persistent Download Counter & APK Trigger -->
   <script>
-    // 1. Fetch live download count directly from GitHub API
+    const NAMESPACE = 'kryn-joint-labs-ui';
+    const KEY = 'apk-downloads';
+    const BASE_URL = 'https://api.counterapi.dev/v1';
+
+    // 1. Fetch live total count on page load
     async function fetchDownloadCount() {
       const counterEl = document.getElementById('liveDownloadCount');
       if (!counterEl) return;
 
       try {
-        const res = await fetch('https://api.github.com/repos/kryn-joint-labs/kryn-ui/releases');
-        if (!res.ok) throw new Error('API request failed');
-        
-        const releases = await res.json();
-        let totalDownloads = 0;
-
-        releases.forEach(release => {
-          if (release.assets && Array.isArray(release.assets)) {
-            release.assets.forEach(asset => {
-              totalDownloads += (asset.download_count || 0);
-            });
-          }
-        });
-
-        counterEl.innerHTML = `${totalDownloads.toLocaleString()} INSTALLED`;
+        const res = await fetch(`${BASE_URL}/${NAMESPACE}/${KEY}`);
+        if (!res.ok) {
+          // If key doesn't exist yet, initialize it
+          counterEl.innerText = '4+ ACTIVE';
+          return;
+        }
+        const data = await res.json();
+        const count = data.count || 0;
+        counterEl.innerHTML = `${count.toLocaleString()} INSTALLED`;
       } catch (err) {
-        // Fallback display if network lags or GitHub rate limits
         counterEl.innerText = '4+ ACTIVE';
       }
     }
 
-    // Run fetch as soon as page loads
     window.addEventListener('DOMContentLoaded', fetchDownloadCount);
 
-    // 2. Trigger Download & Optimistically Increment Counter
-    function triggerDownload() {
+    // 2. Increment count on click and trigger download
+    async function triggerDownload() {
       const btn = document.getElementById('dlBtn');
+      const counterEl = document.getElementById('liveDownloadCount');
       const originalHTML = btn.innerHTML;
 
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing APK...';
       btn.style.pointerEvents = 'none';
 
-      // Instantly bump the live counter on screen
-      const counterEl = document.getElementById('liveDownloadCount');
-      if (counterEl) {
-        let currentNum = parseInt(counterEl.innerText.replace(/,/g, ''), 10);
-        if (!isNaN(currentNum)) {
-          counterEl.innerHTML = `${(currentNum + 1).toLocaleString()} INSTALLED`;
+      // Increment persistent counter
+      try {
+        const res = await fetch(`${BASE_URL}/${NAMESPACE}/${KEY}/up`);
+        if (res.ok) {
+          const data = await res.json();
+          if (counterEl) {
+            counterEl.innerHTML = `${data.count.toLocaleString()} INSTALLED`;
+          }
+        }
+      } catch (e) {
+        // Fallback optimistic increment
+        if (counterEl) {
+          let current = parseInt(counterEl.innerText.replace(/\D/g, ''), 10) || 4;
+          counterEl.innerHTML = `${(current + 1).toLocaleString()} INSTALLED`;
         }
       }
 
@@ -703,7 +708,7 @@
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Downloading Started!';
         btn.style.backgroundColor = '#16a34a';
 
-        // Direct link to the compiled APK from GitHub Releases
+        // Direct link to the compiled APK
         const link = document.createElement('a');
         link.href = 'https://github.com/kryn-joint-labs/kryn-ui/releases/download/latest/kryn-ui.apk';
         link.setAttribute('download', 'Kryn-UI-v1.0-Draft.apk');
@@ -716,7 +721,7 @@
           btn.style.backgroundColor = '#000000';
           btn.style.pointerEvents = 'auto';
         }, 2500);
-      }, 900);
+      }, 700);
     }
   </script>
 
