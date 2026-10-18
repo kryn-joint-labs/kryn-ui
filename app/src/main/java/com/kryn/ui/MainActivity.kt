@@ -115,6 +115,25 @@ fun KrynStorefrontApp() {
         )
     }
 
+    val signatureWidgets = remember {
+        listOf(
+            WidgetItem(
+                name = "KRYN // LUNAR",
+                tag = "STENCIL CHRONO",
+                format = "4x2 // REVISION 1.2",
+                category = "minimal",
+                imageUrl = "https://i.ibb.co/PvLzfMXP/IMG-20261018-092126.jpg"
+            ),
+            WidgetItem(
+                name = "KRYN // VELVET",
+                tag = "SCRIPT LAVENDER",
+                format = "4x4 // REVISION 1.0",
+                category = "minimal",
+                imageUrl = "https://i.ibb.co/1000087432/velvet-preview.png"
+            )
+        )
+    }
+
     BackHandler(enabled = currentScreen !is Screen.Home) {
         currentScreen = when (currentScreen) {
             is Screen.CategoryDetail -> Screen.AllCategories
