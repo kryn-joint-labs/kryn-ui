@@ -6,6 +6,7 @@
     android:targetCellHeight="4"
     android:updatePeriodMillis="1800000"
     android:label="SCRIPT LAVENDER"
+    android:previewImage="@drawable/preview_velvet"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:initialLayout="@layout/widget_velvet" />
