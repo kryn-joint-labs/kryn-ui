@@ -1,13 +1,17 @@
 package com.kryn.ui
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -51,8 +55,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        requestBatteryExemptionIfNeeded(this)
         setContent {
             KrynStorefrontApp()
+        }
+    }
+}
+
+@SuppressLint("BatteryLife")
+fun requestBatteryExemptionIfNeeded(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!pm.isIgnoringBatteryOptimizations(context.packageName)) {
+            try {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                }
+                context.startActivity(intent)
+            } catch (_: Exception) {}
         }
     }
 }
@@ -80,7 +100,7 @@ fun pinWidgetToHomeScreen(context: Context, widgetName: String) {
             Toast.makeText(context, "Launcher does not support direct pinning. Long-press home screen.", Toast.LENGTH_LONG).show()
         }
     } else {
-        Toast.makeText(context, "Long-press your home screen to add widgets.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Long-press home screen to place widgets.", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -91,10 +111,13 @@ val CleanSansFont = FontFamily(Typeface.create("sans-serif-medium", Typeface.NOR
 data class CategoryItem(val id: String, val title: String, val subtitle: String, val imageUrl: String)
 data class WidgetItem(val name: String, val tag: String, val format: String, val category: String, val imageRes: Int)
 
+data class ColorPreset(val name: String, val hex: Long)
+
 sealed class Screen {
     object Home : Screen()
     object AllCategories : Screen()
     data class CategoryDetail(val category: CategoryItem) : Screen()
+    data class VelvetCustomizer(val widget: WidgetItem) : Screen()
 }
 
 @Composable
@@ -131,6 +154,7 @@ fun KrynStorefrontApp() {
 
     BackHandler(enabled = currentScreen !is Screen.Home) {
         currentScreen = when (currentScreen) {
+            is Screen.VelvetCustomizer -> Screen.Home
             is Screen.CategoryDetail -> Screen.AllCategories
             is Screen.AllCategories -> Screen.Home
             else -> Screen.Home
@@ -146,33 +170,15 @@ fun KrynStorefrontApp() {
             AnimatedContent(
                 targetState = currentScreen,
                 transitionSpec = {
-                    if (targetState is Screen.CategoryDetail || (initialState is Screen.Home && targetState is Screen.AllCategories)) {
-                        (slideInHorizontally(
-                            initialOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() },
-                            animationSpec = tween(420, easing = FastOutSlowInEasing)
-                        ) + fadeIn(animationSpec = tween(380)) + scaleIn(
-                            initialScale = 0.94f,
-                            animationSpec = tween(420, easing = FastOutSlowInEasing)
-                        )).togetherWith(
-                            slideOutHorizontally(
-                                targetOffsetX = { fullWidth -> (-fullWidth * 0.25f).toInt() },
-                                animationSpec = tween(350, easing = FastOutSlowInEasing)
-                            ) + fadeOut(animationSpec = tween(280))
-                        )
-                    } else {
-                        (slideInHorizontally(
-                            initialOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
-                            animationSpec = tween(400, easing = FastOutSlowInEasing)
-                        ) + fadeIn(animationSpec = tween(380))).togetherWith(
-                            slideOutHorizontally(
-                                targetOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() },
-                                animationSpec = tween(350, easing = FastOutSlowInEasing)
-                            ) + fadeOut(animationSpec = tween(260)) + scaleOut(
-                                targetScale = 0.95f,
-                                animationSpec = tween(350, easing = FastOutSlowInEasing)
-                            )
-                        )
-                    }
+                    (slideInHorizontally(
+                        initialOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() },
+                        animationSpec = tween(420, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(380))).togetherWith(
+                        slideOutHorizontally(
+                            targetOffsetX = { fullWidth -> (-fullWidth * 0.25f).toInt() },
+                            animationSpec = tween(350, easing = FastOutSlowInEasing)
+                        ) + fadeOut(animationSpec = tween(280))
+                    )
                 },
                 label = "ScreenTransition"
             ) { targetScreen ->
@@ -182,7 +188,14 @@ fun KrynStorefrontApp() {
                             categories = categories,
                             signatureWidgets = signatureWidgets,
                             onViewAllCategories = { currentScreen = Screen.AllCategories },
-                            onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) }
+                            onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) },
+                            onWidgetApply = { widget ->
+                                if (widget.name.contains("VELVET", ignoreCase = true)) {
+                                    currentScreen = Screen.VelvetCustomizer(widget)
+                                } else {
+                                    pinWidgetToHomeScreen(context = null ?: LocalContext.current, widget.name)
+                                }
+                            }
                         )
                     }
                     is Screen.AllCategories -> {
@@ -196,10 +209,247 @@ fun KrynStorefrontApp() {
                         CategoryDetailScreen(
                             category = targetScreen.category,
                             widgets = signatureWidgets.filter { it.category.equals(targetScreen.category.id, ignoreCase = true) },
-                            onBack = { currentScreen = Screen.AllCategories }
+                            onBack = { currentScreen = Screen.AllCategories },
+                            onWidgetApply = { widget ->
+                                if (widget.name.contains("VELVET", ignoreCase = true)) {
+                                    currentScreen = Screen.VelvetCustomizer(widget)
+                                } else {
+                                    pinWidgetToHomeScreen(context = null ?: LocalContext.current, widget.name)
+                                }
+                            }
+                        )
+                    }
+                    is Screen.VelvetCustomizer -> {
+                        VelvetCustomizerScreen(
+                            widget = targetScreen.widget,
+                            onBack = { currentScreen = Screen.Home }
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun VelvetCustomizerScreen(
+    widget: WidgetItem,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("kryn_velvet_prefs", Context.MODE_PRIVATE) }
+
+    val dayPresets = listOf(
+        ColorPreset("Lavender", 0xFFB84DFF),
+        ColorPreset("Pure White", 0xFFFFFFFF),
+        ColorPreset("Neon Cyan", 0xFF00E5FF),
+        ColorPreset("Coral Red", 0xFFFF3B30)
+    )
+
+    val timePresets = listOf(
+        ColorPreset("Ghost White", 0xFFFFFFFF),
+        ColorPreset("Charcoal", 0xFF111218),
+        ColorPreset("Silver", 0xFF9E9E9E),
+        ColorPreset("Pure Black", 0xFF000000)
+    )
+
+    var selectedDayColor by remember {
+        mutableStateOf(prefs.getLong("velvet_color_day", 0xFFB84DFF))
+    }
+    var selectedTimeColor by remember {
+        mutableStateOf(prefs.getLong("velvet_color_time", 0xFFFFFFFF))
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentPadding = PaddingValues(top = 44.dp, bottom = 40.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "← CANCEL",
+                    color = Color(0xFFE10600),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MonoBrandFont,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onBack() }
+                        .padding(8.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "CONFIGURE VELVET",
+                    color = Color(0xFF0F1117),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp,
+                    fontFamily = CondensedDisplayFont
+                )
+            }
+        }
+
+        // Live Preview Box
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF0D0E12))
+                    .border(1.dp, Color(0xFF22242B), RoundedCornerShape(22.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "4:20",
+                            color = Color(selectedTimeColor).copy(alpha = 0.25f),
+                            fontSize = 80.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = CondensedDisplayFont
+                        )
+                        Text(
+                            text = "Sunday",
+                            color = Color(selectedDayColor),
+                            fontSize = 38.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(44.dp)
+                            .height(1.5.dp)
+                            .background(Color(selectedTimeColor).copy(alpha = 0.4f))
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "18 OCTOBER 2026",
+                        color = Color(selectedTimeColor).copy(alpha = 0.85f),
+                        fontSize = 11.sp,
+                        letterSpacing = 1.5.sp,
+                        fontFamily = MonoBrandFont
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Color 1: Day (Script)
+        item {
+            Text(
+                text = "COLOR 1 (DAY SCRIPT)",
+                color = Color(0xFF0F1117),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontFamily = MonoBrandFont
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                dayPresets.forEach { preset ->
+                    val isSelected = selectedDayColor == preset.hex
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(preset.hex))
+                            .border(
+                                width = if (isSelected) 3.dp else 1.dp,
+                                color = if (isSelected) Color(0xFF0F1117) else Color(0x33000000),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable { selectedDayColor = preset.hex }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Color 2: Time & Date
+        item {
+            Text(
+                text = "COLOR 2 (TIME & DATE)",
+                color = Color(0xFF0F1117),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontFamily = MonoBrandFont
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                timePresets.forEach { preset ->
+                    val isSelected = selectedTimeColor == preset.hex
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(preset.hex))
+                            .border(
+                                width = if (isSelected) 3.dp else 1.dp,
+                                color = if (isSelected) Color(0xFFE10600) else Color(0x33000000),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable { selectedTimeColor = preset.hex }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Tip: Choose White for dark wallpapers, or Charcoal/Black for light wallpapers.",
+                color = Color(0xFF6B7280),
+                fontSize = 11.sp,
+                fontFamily = CleanSansFont
+            )
+            Spacer(modifier = Modifier.height(30.dp))
+        }
+
+        // Confirm & Pin Button
+        item {
+            Button(
+                onClick = {
+                    prefs.edit()
+                        .putLong("velvet_color_day", selectedDayColor)
+                        .putLong("velvet_color_time", selectedTimeColor)
+                        .apply()
+
+                    // Broadcast immediately to update widget on home screen
+                    val updateIntent = Intent(context, VelvetWidgetReceiver::class.java).apply {
+                        action = VelvetWidgetReceiver.ACTION_MINUTE_TICK
+                    }
+                    context.sendBroadcast(updateIntent)
+
+                    pinWidgetToHomeScreen(context, widget.name)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F1117)),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(
+                    text = "SAVE & PIN TO HOME SCREEN",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MonoBrandFont,
+                    letterSpacing = 1.sp
+                )
             }
         }
     }
@@ -210,10 +460,9 @@ fun HomeScreen(
     categories: List<CategoryItem>,
     signatureWidgets: List<WidgetItem>,
     onViewAllCategories: () -> Unit,
-    onSelectCategory: (CategoryItem) -> Unit
+    onSelectCategory: (CategoryItem) -> Unit,
+    onWidgetApply: (WidgetItem) -> Unit
 ) {
-    val context = LocalContext.current
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = 44.dp, bottom = 48.dp)
@@ -425,7 +674,7 @@ fun HomeScreen(
                 Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
                     RealWidgetCard(
                         widget = widget,
-                        onApplyClick = { pinWidgetToHomeScreen(context, widget.name) }
+                        onApplyClick = { onWidgetApply(widget) }
                     )
                 }
             }
@@ -538,10 +787,9 @@ fun AllCategoriesScreen(
 fun CategoryDetailScreen(
     category: CategoryItem,
     widgets: List<WidgetItem>,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onWidgetApply: (WidgetItem) -> Unit
 ) {
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -633,7 +881,7 @@ fun CategoryDetailScreen(
                     EntranceContainer(delay = 120 + (index * 70)) {
                         RealWidgetCard(
                             widget = widget,
-                            onApplyClick = { pinWidgetToHomeScreen(context, widget.name) }
+                            onApplyClick = { onWidgetApply(widget) }
                         )
                     }
                 }
