@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Function to pin widget to home screen natively
 fun pinWidgetToHomeScreen(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val appWidgetManager = context.getSystemService(AppWidgetManager::class.java)
@@ -109,9 +108,9 @@ fun KrynStorefrontApp() {
             WidgetItem(
                 name = "KRYN // LUNAR",
                 tag = "STENCIL CHRONO",
-                format = "4x2 // REVISION 1.0",
+                format = "4x2 // REVISION 1.2",
                 category = "minimal",
-                imageUrl = "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=85"
+                imageUrl = "https://i.ibb.co/PvLzfMXP/IMG-20261018-092126.jpg"
             )
         )
     }
@@ -233,7 +232,7 @@ fun HomeScreen(
                             )
                         }
                         Text(
-                            text = "BY KRYN JOINT LABS // ENGINE v1.0",
+                            text = "BY KRYN JOINT LABS // ENGINE v1.2",
                             color = Color(0xFFE10600),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
@@ -379,6 +378,7 @@ fun HomeScreen(
             }
         }
 
+        // SIGNATURE DROPS ROW WITH "v1.2 ACTIVE"
         item {
             EntranceContainer(delay = 250) {
                 Row(
@@ -397,7 +397,7 @@ fun HomeScreen(
                         fontFamily = CondensedDisplayFont
                     )
                     Text(
-                        text = "v1.0 ACTIVE",
+                        text = "v1.2 ACTIVE",
                         color = Color(0xFFE10600),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -755,11 +755,13 @@ fun RealWidgetCard(
             .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(22.dp))
             .padding(14.dp)
     ) {
+        // Thumbnail container showing the real preview image
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(140.dp)
                 .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF090A0F))
         ) {
             AsyncImage(
                 model = widget.imageUrl,
@@ -767,40 +769,6 @@ fun RealWidgetCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0x55000000))
-            )
-
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "F R I D A Y",
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 6.sp,
-                    fontFamily = CondensedDisplayFont
-                )
-                Text(
-                    text = "17 OCTOBER, 2026",
-                    color = Color(0xEEFFFFFF),
-                    fontSize = 9.sp,
-                    letterSpacing = 1.5.sp,
-                    fontFamily = MonoBrandFont
-                )
-                Text(
-                    text = "- 09:44:00 PM -",
-                    color = Color(0xAAFFFFFF),
-                    fontSize = 9.sp,
-                    letterSpacing = 1.sp,
-                    fontFamily = MonoBrandFont
-                )
-            }
 
             Box(
                 modifier = Modifier
