@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@android:style/Theme.DeviceDefault.DayNight"
     android:padding="8dp">
 
     <!-- VERTICALLY & HORIZONTALLY CENTERED CLOCK CLUSTER -->
@@ -19,38 +18,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <!-- 1. GHOST TIME (TALL BEBAS NEUE FONT, ZERO-DELAY, ADAPTS TO WALLPAPER) -->
-            <TextClock
-                android:id="@+id/velvet_time_clock"
+            <!-- 1. TIME NUMBERS (BEBAS NEUE CLOCK_DIGITS.TTF AT 140dp) -->
+            <ImageView
+                android:id="@+id/velvet_time_img"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:format12Hour="h:mm"
-                android:format24Hour="kk:mm"
-                android:textColor="?android:attr/textColorPrimary"
-                android:alpha="0.22"
-                android:textSize="110sp"
-                android:fontFamily="@font/clock_digits"
-                android:includeFontPadding="false" />
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
 
-            <!-- 2. AM/PM INDICATOR (PINNED TO THE RIGHT OF NUMBERS, ADAPTS TO WALLPAPER) -->
-            <TextClock
-                android:id="@+id/velvet_ampm_clock"
+            <!-- 2. AM/PM INDICATOR (PINNED TO THE RIGHT OF NUMBERS) -->
+            <ImageView
+                android:id="@+id/velvet_ampm_img"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/velvet_time_clock"
-                android:layout_alignBottom="@id/velvet_time_clock"
+                android:layout_toEndOf="@id/velvet_time_img"
+                android:layout_alignBottom="@id/velvet_time_img"
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="20dp"
-                android:format12Hour="a"
-                android:format24Hour=""
-                android:textColor="?android:attr/textColorPrimary"
-                android:alpha="0.45"
-                android:textSize="13sp"
-                android:fontFamily="@font/sans_meta"
-                android:includeFontPadding="false" />
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
 
-            <!-- 3. SCRIPT DAY OVERLAY (PERMANENT LAVENDER #B84DFF) -->
+            <!-- 3. SCRIPT DAY OVERLAY -->
             <ImageView
                 android:id="@+id/velvet_day_img"
                 android:layout_width="wrap_content"
@@ -61,27 +50,22 @@
 
         </RelativeLayout>
 
-        <!-- 4. CENTERED DIVIDER LINE (ADAPTS TO WALLPAPER) -->
+        <!-- 4. CENTERED DIVIDER LINE -->
         <ImageView
             android:id="@+id/velvet_divider_img"
-            android:layout_width="48dp"
-            android:layout_height="1.5dp"
-            android:layout_marginTop="4dp"
+            android:layout_width="54dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:background="?android:attr/textColorPrimary"
-            android:alpha="0.35" />
+            android:scaleType="fitXY" />
 
-        <!-- 5. DATE (ADAPTS TO WALLPAPER, ALL-CAPS SANS-META) -->
-        <TextClock
-            android:id="@+id/velvet_date_clock"
+        <!-- 5. DATE -->
+        <ImageView
+            android:id="@+id/velvet_date_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:format12Hour="d MMMM yyyy"
-            android:format24Hour="d MMMM yyyy"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="13sp"
-            android:fontFamily="@font/sans_meta"
-            android:letterSpacing="0.18" />
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter" />
 
     </LinearLayout>
 
