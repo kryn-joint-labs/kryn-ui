@@ -18,26 +18,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <!-- 1. TIME NUMBERS (GHOST WATERMARK) -->
-            <ImageView
-                android:id="@+id/velvet_time_img"
+            <!-- 1. TIME NUMBERS (HOURS & MINUTES ONLY - ZERO SECONDS, AUTO-UPDATES EVERY MINUTE) -->
+            <TextClock
+                android:id="@+id/velvet_time_clock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:format12Hour="h:mm"
+                android:format24Hour="kk:mm"
+                android:textColor="#33FFFFFF"
+                android:textSize="86sp"
+                android:fontFamily="@font/clock_digits"
+                android:includeFontPadding="false" />
 
-            <!-- 2. AM/PM INDICATOR (PINNED STRICTLY TO THE RIGHT OF NUMBERS) -->
-            <ImageView
-                android:id="@+id/velvet_ampm_img"
+            <!-- 2. AM/PM INDICATOR (PINNED TO THE RIGHT OF NUMBERS) -->
+            <TextClock
+                android:id="@+id/velvet_ampm_clock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/velvet_time_img"
-                android:layout_alignBottom="@id/velvet_time_img"
+                android:layout_toEndOf="@id/velvet_time_clock"
+                android:layout_alignBottom="@id/velvet_time_clock"
                 android:layout_marginStart="4dp"
-                android:layout_marginBottom="14dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:layout_marginBottom="16dp"
+                android:format12Hour="a"
+                android:format24Hour=""
+                android:textColor="#55FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="@font/sans_meta"
+                android:includeFontPadding="false" />
 
             <!-- 3. SCRIPT DAY OVERLAY (PERMANENT LAVENDER #B84DFF) -->
             <ImageView
@@ -55,8 +63,8 @@
             android:id="@+id/velvet_divider_img"
             android:layout_width="48dp"
             android:layout_height="1.5dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:scaleType="fitXY" />
 
         <!-- 5. DATE (SANS GEOMETRIC ALL-CAPS) -->
