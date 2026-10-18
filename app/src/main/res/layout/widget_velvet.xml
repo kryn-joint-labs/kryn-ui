@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- VERTICALLY & HORIZONTALLY CENTERED CLOCK BLOCK -->
+    <LinearLayout
+        android:id="@+id/velvet_center_cluster"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- LAYERED TIME CLUSTER: Numbers + Right-Pinned AM/PM + Script Overlay -->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!-- 1. TIME NUMBERS (GHOST WATERMARK) -->
+            <ImageView
+                android:id="@+id/velvet_time_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+
+            <!-- 2. AM/PM INDICATOR (PINNED STRICTLY TO THE RIGHT OF NUMBERS) -->
+            <ImageView
+                android:id="@+id/velvet_ampm_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/velvet_time_img"
+                android:layout_alignBottom="@id/velvet_time_img"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="14dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+
+            <!-- 3. SCRIPT DAY OVERLAY (PERMANENT LAVENDER #B84DFF) -->
+            <ImageView
+                android:id="@+id/velvet_day_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+
+        </RelativeLayout>
+
+        <!-- 4. CENTERED DIVIDER LINE -->
+        <ImageView
+            android:id="@+id/velvet_divider_img"
+            android:layout_width="48dp"
+            android:layout_height="1.5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:scaleType="fitXY" />
+
+        <!-- 5. DATE (SANS GEOMETRIC ALL-CAPS) -->
+        <ImageView
+            android:id="@+id/velvet_date_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter" />
+
+    </LinearLayout>
+
+</RelativeLayout>
