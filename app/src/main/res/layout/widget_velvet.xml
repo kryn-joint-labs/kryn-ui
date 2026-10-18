@@ -2,9 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="8dp">
 
-    <!-- VERTICALLY & HORIZONTALLY CENTERED CLOCK BLOCK -->
+    <!-- VERTICALLY & HORIZONTALLY CENTERED CLOCK CLUSTER -->
     <LinearLayout
         android:id="@+id/velvet_center_cluster"
         android:layout_width="wrap_content"
@@ -13,40 +13,31 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <!-- LAYERED TIME CLUSTER: Numbers + Right-Pinned AM/PM + Script Overlay -->
+        <!-- LAYERED TIME CLUSTER -->
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <!-- 1. TIME NUMBERS (HOURS & MINUTES ONLY - ZERO SECONDS, AUTO-UPDATES EVERY MINUTE) -->
-            <TextClock
-                android:id="@+id/velvet_time_clock"
+            <!-- 1. TIME NUMBERS (BEBAS NEUE CLOCK_DIGITS.TTF AT MASSIVE SCALE) -->
+            <ImageView
+                android:id="@+id/velvet_time_img"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:format12Hour="h:mm"
-                android:format24Hour="kk:mm"
-                android:textColor="#33FFFFFF"
-                android:textSize="86sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-condensed"
-                android:includeFontPadding="false" />
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
 
-            <!-- 2. AM/PM INDICATOR (PINNED TO THE RIGHT OF NUMBERS) -->
-            <TextClock
-                android:id="@+id/velvet_ampm_clock"
+            <!-- 2. AM/PM INDICATOR (PINNED STRICTLY TO THE RIGHT OF NUMBERS) -->
+            <ImageView
+                android:id="@+id/velvet_ampm_img"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/velvet_time_clock"
-                android:layout_alignBottom="@id/velvet_time_clock"
+                android:layout_toEndOf="@id/velvet_time_img"
+                android:layout_alignBottom="@id/velvet_time_img"
                 android:layout_marginStart="4dp"
-                android:layout_marginBottom="16dp"
-                android:format12Hour="a"
-                android:format24Hour=""
-                android:textColor="#55FFFFFF"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-medium"
-                android:includeFontPadding="false" />
+                android:layout_marginBottom="18dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
 
             <!-- 3. SCRIPT DAY OVERLAY (PERMANENT LAVENDER #B84DFF) -->
             <ImageView
@@ -64,7 +55,7 @@
             android:id="@+id/velvet_divider_img"
             android:layout_width="48dp"
             android:layout_height="1.5dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:layout_marginBottom="8dp"
             android:scaleType="fitXY" />
 
