@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@android:style/Theme.DeviceDefault.DayNight"
     android:padding="8dp">
 
     <!-- VERTICALLY & HORIZONTALLY CENTERED CLOCK CLUSTER -->
@@ -18,26 +19,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <!-- 1. TIME NUMBERS (BEBAS NEUE CLOCK_DIGITS.TTF AT MASSIVE SCALE) -->
-            <ImageView
-                android:id="@+id/velvet_time_img"
+            <!-- 1. GHOST TIME (TALL BEBAS NEUE FONT, ZERO-DELAY, ADAPTS TO WALLPAPER) -->
+            <TextClock
+                android:id="@+id/velvet_time_clock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:format12Hour="h:mm"
+                android:format24Hour="kk:mm"
+                android:textColor="?android:attr/textColorPrimary"
+                android:alpha="0.22"
+                android:textSize="110sp"
+                android:fontFamily="@font/clock_digits"
+                android:includeFontPadding="false" />
 
-            <!-- 2. AM/PM INDICATOR (PINNED STRICTLY TO THE RIGHT OF NUMBERS) -->
-            <ImageView
-                android:id="@+id/velvet_ampm_img"
+            <!-- 2. AM/PM INDICATOR (PINNED TO THE RIGHT OF NUMBERS, ADAPTS TO WALLPAPER) -->
+            <TextClock
+                android:id="@+id/velvet_ampm_clock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/velvet_time_img"
-                android:layout_alignBottom="@id/velvet_time_img"
+                android:layout_toEndOf="@id/velvet_time_clock"
+                android:layout_alignBottom="@id/velvet_time_clock"
                 android:layout_marginStart="4dp"
-                android:layout_marginBottom="18dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:layout_marginBottom="20dp"
+                android:format12Hour="a"
+                android:format24Hour=""
+                android:textColor="?android:attr/textColorPrimary"
+                android:alpha="0.45"
+                android:textSize="13sp"
+                android:fontFamily="@font/sans_meta"
+                android:includeFontPadding="false" />
 
             <!-- 3. SCRIPT DAY OVERLAY (PERMANENT LAVENDER #B84DFF) -->
             <ImageView
@@ -50,22 +61,27 @@
 
         </RelativeLayout>
 
-        <!-- 4. CENTERED DIVIDER LINE -->
+        <!-- 4. CENTERED DIVIDER LINE (ADAPTS TO WALLPAPER) -->
         <ImageView
             android:id="@+id/velvet_divider_img"
             android:layout_width="48dp"
             android:layout_height="1.5dp"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="4dp"
             android:layout_marginBottom="8dp"
-            android:scaleType="fitXY" />
+            android:background="?android:attr/textColorPrimary"
+            android:alpha="0.35" />
 
-        <!-- 5. DATE (SANS GEOMETRIC ALL-CAPS) -->
-        <ImageView
-            android:id="@+id/velvet_date_img"
+        <!-- 5. DATE (ADAPTS TO WALLPAPER, ALL-CAPS SANS-META) -->
+        <TextClock
+            android:id="@+id/velvet_date_clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter" />
+            android:format12Hour="d MMMM yyyy"
+            android:format24Hour="d MMMM yyyy"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp"
+            android:fontFamily="@font/sans_meta"
+            android:letterSpacing="0.18" />
 
     </LinearLayout>
 
