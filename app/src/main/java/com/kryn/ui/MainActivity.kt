@@ -14,6 +14,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -87,7 +89,7 @@ val MonoBrandFont = FontFamily.Monospace
 val CleanSansFont = FontFamily(Typeface.create("sans-serif-medium", Typeface.NORMAL))
 
 data class CategoryItem(val id: String, val title: String, val subtitle: String, val imageUrl: String)
-data class WidgetItem(val name: String, val tag: String, val format: String, val category: String, val imageUrl: String)
+data class WidgetItem(val name: String, val tag: String, val format: String, val category: String, val imageRes: Int)
 
 sealed class Screen {
     object Home : Screen()
@@ -108,7 +110,6 @@ fun KrynStorefrontApp() {
         )
     }
 
-    // Only ONE declaration of signatureWidgets containing both widgets
     val signatureWidgets = remember {
         listOf(
             WidgetItem(
@@ -116,14 +117,14 @@ fun KrynStorefrontApp() {
                 tag = "STENCIL CHRONO",
                 format = "4x2 // REVISION 1.2",
                 category = "minimal",
-                imageUrl = "https://i.ibb.co/PvLzfMXP/IMG-20261018-092126.jpg"
+                imageRes = R.drawable.preview_lunar
             ),
             WidgetItem(
                 name = "KRYN // VELVET",
                 tag = "SCRIPT LAVENDER",
                 format = "4x4 // REVISION 1.0",
                 category = "minimal",
-                imageUrl = "https://i.ibb.co/1000087432/velvet-preview.png"
+                imageRes = R.drawable.preview_velvet
             )
         )
     }
@@ -774,8 +775,8 @@ fun RealWidgetCard(
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color(0xFF090A0F))
         ) {
-            AsyncImage(
-                model = widget.imageUrl,
+            Image(
+                painter = painterResource(id = widget.imageRes),
                 contentDescription = widget.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
