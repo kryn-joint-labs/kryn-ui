@@ -628,7 +628,7 @@
 
       <div class="apk-info">
         <span class="apk-badge">CURRENT REVISION</span>
-        <h3 class="apk-title">Kryn UI v1.2</h3>
+        <h3 class="apk-title">Kryn UI v1.3</h3>
         <p class="apk-desc">
           Clean standalone build operating directly through native Android Manifest systems. Eliminates blocky default widgets with desktop-grade aesthetics while keeping your hardware and GPU completely unforced.
         </p>
@@ -637,26 +637,30 @@
           <span>Installer: <strong>Direct Manifest</strong></span>
           <span>Target: <strong>Android 11+</strong></span>
           <span>GPU Load: <strong>0% Forced</strong></span>
-          <span>Build: <strong>#v1.2-STABLE</strong></span>
+          <span>Build: <strong>#v1.3-STABLE</strong></span>
           <span>Downloads: <strong id="liveDownloadCount" style="color: #22c55e;"><i class="fa-solid fa-spinner fa-spin"></i></strong></span>
         </div>
       </div>
 
       <!-- Single Download Trigger -->
-      <button class="download-action-btn" id="dlBtn" onclick="triggerDownload()">
+      <!-- Direct native download anchor -->
+      <a href="https://github.com/kryn-joint-labs/kryn-ui/releases/download/latest/kryn-ui-v1.3.apk" 
+         class="download-action-btn" 
+         id="dlBtn" 
+         onclick="handleDownloadEvent()">
         <i class="fa-solid fa-download"></i>
         <span>Download APK</span>
-      </button>
+      </a>
     </div>
   </section>
 
-<!-- Persistent Download Counter & APK Trigger -->
+<!-- Persistent Download Counter & Native APK Trigger -->
   <script>
     const NAMESPACE = 'kryn-joint-labs-ui';
     const KEY = 'apk-downloads';
     const BASE_URL = 'https://api.counterapi.dev/v1';
 
-    // 1. Fetch live total count on page load
+    // 1. Fetch live download count on page load
     async function fetchDownloadCount() {
       const counterEl = document.getElementById('liveDownloadCount');
       if (!counterEl) return;
@@ -664,7 +668,6 @@
       try {
         const res = await fetch(`${BASE_URL}/${NAMESPACE}/${KEY}`);
         if (!res.ok) {
-          // If key doesn't exist yet, initialize it
           counterEl.innerText = '4+ ACTIVE';
           return;
         }
@@ -678,16 +681,16 @@
 
     window.addEventListener('DOMContentLoaded', fetchDownloadCount);
 
-    // 2. Increment count on click and trigger download
-    async function triggerDownload() {
+    // 2. Run button visual effect and increment counter
+    async function handleDownloadEvent() {
       const btn = document.getElementById('dlBtn');
       const counterEl = document.getElementById('liveDownloadCount');
       const originalHTML = btn.innerHTML;
 
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing APK...';
-      btn.style.pointerEvents = 'none';
+      // Show loading status on the button
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';
 
-      // Increment persistent counter
+      // Increment live install counter
       try {
         const res = await fetch(`${BASE_URL}/${NAMESPACE}/${KEY}/up`);
         if (res.ok) {
@@ -697,31 +700,23 @@
           }
         }
       } catch (e) {
-        // Fallback optimistic increment
         if (counterEl) {
           let current = parseInt(counterEl.innerText.replace(/\D/g, ''), 10) || 4;
           counterEl.innerHTML = `${(current + 1).toLocaleString()} INSTALLED`;
         }
       }
 
+      // Turn button green and confirm
       setTimeout(() => {
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Downloading Started!';
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Download Started!';
         btn.style.backgroundColor = '#16a34a';
 
-        // Direct link to the versioned APK from GitHub Releases
-        const link = document.createElement('a');
-        link.href = 'https://github.com/kryn-joint-labs/kryn-ui/releases/download/latest/kryn-ui-v1.2.apk';
-        link.setAttribute('download', 'kryn-ui-v1.2.apk');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        
+        // Reset button back to normal after 3 seconds
         setTimeout(() => {
           btn.innerHTML = originalHTML;
           btn.style.backgroundColor = '#000000';
-          btn.style.pointerEvents = 'auto';
-        }, 2500);
-      }, 700);
+        }, 3000);
+      }, 600);
     }
   </script>
 
