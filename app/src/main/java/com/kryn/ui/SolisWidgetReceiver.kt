@@ -10,6 +10,8 @@ import android.content.Intent
 import android.graphics.*
 import android.os.Build
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import java.util.Calendar
 
 class SolisWidgetReceiver : AppWidgetProvider() {
@@ -23,7 +25,6 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val thisWidget = ComponentName(context, SolisWidgetReceiver::class.java)
         val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
-        
         if (appWidgetIds.isNotEmpty()) {
             onUpdate(context, appWidgetManager, appWidgetIds)
         }
@@ -44,44 +45,100 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // Schedule next :00 or :30 boundary
         scheduleNextDaylightTick(context)
 
         val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
+        val totalMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
 
-        // 48-Phase Daylight Calculation (0 to 47)
-        val phaseIndex = (hour * 2) + if (minute >= 30) 1 else 0
-        val daylightPalette = getDaylightColors(phaseIndex)
+        // Mathematical continuous gradient interpolation across the 24-hour cycle
+        val palette = computeInterpolatedPalette(totalMinutes)
 
         val prefs = context.getSharedPreferences("kryn_solis_prefs", Context.MODE_PRIVATE)
         val customText = prefs.getString("solis_custom_text", "EVELESKE") ?: "EVELESKE"
         val showBackground = prefs.getBoolean("solis_show_bg", true)
 
-        // Load Brick Sans font safely
         val customTypeface = try {
             Typeface.createFromAsset(context.assets, "fonts/brick_sans.ttf")
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             try {
                 Typeface.createFromAsset(context.assets, "fonts/brick_sans.otf")
-            } catch (e2: Exception) {
+            } catch (_: Exception) {
                 Typeface.create("sans-serif-condensed", Typeface.BOLD)
             }
         }
 
-        // Render Ultra-Crisp Anti-Aliased Subpixel Bitmaps
-        val textBmp = renderTextBitmap(customText.uppercase(), daylightPalette.accentColor, customTypeface)
-        val pillBmp = if (showBackground) renderPillBitmap(daylightPalette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        val hexBmp = renderHexBitmap(daylightPalette.hexColor)
+        // Render anti-aliased subpixel bitmaps
+        val textBmp = renderTextBitmap(customText.uppercase(), palette.accentColor, customTypeface)
+        val pillBmp = if (showBackground) renderPillBitmap(palette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+        val hexBmp = renderHexBitmap(palette.hexColor)
+
+        // Dynamically tint the 2.5x clock hands to match the exact daytime accent color
+        val hourHandBmp = renderTintedHand(context, R.drawable.solis_hand_hour, palette.accentColor)
+        val minuteHandBmp = renderTintedHand(context, R.drawable.solis_hand_minute, palette.accentColor)
+        val secondHandBmp = renderTintedHand(context, R.drawable.solis_hand_second, palette.accentColor)
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_solis)
             views.setImageViewBitmap(R.id.solis_pill_bg_img, pillBmp)
             views.setImageViewBitmap(R.id.solis_custom_text_img, textBmp)
             views.setImageViewBitmap(R.id.solis_hex_bg_img, hexBmp)
+
+            // Inject tinted hand bitmaps directly into the AnalogClock
+            if (hourHandBmp != null) views.setImageViewBitmap(R.id.solis_analog_clock, hourHandBmp)
+
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
+    }
+
+    private data class Palette(val pillColor: Int, val hexColor: Int, val accentColor: Int)
+    private data class Anchor(val minuteOfDay: Int, val palette: Palette)
+
+    private fun computeInterpolatedPalette(currentMinute: Int): Palette {
+        // 6 Peak Anchors across the 24-hour cycle (1440 minutes)
+        val anchors = listOf(
+            Anchor(120,  Palette(0xFF07080F.toInt(), 0xFF0B0C15.toInt(), 0xFF4F46E5.toInt())), // 02:00 Midnight
+            Anchor(360,  Palette(0xFF34223E.toInt(), 0xFF572F55.toInt(), 0xFFFB7185.toInt())), // 06:00 Sunrise
+            Anchor(540,  Palette(0xFFDCE8F7.toInt(), 0xFF4D5C7A.toInt(), 0xFF0284C7.toInt())), // 09:00 Morning
+            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFF232730.toInt(), 0xFFFBBF24.toInt())), // 12:30 Apex Noon
+            Anchor(1080, Palette(0xFF371F32.toInt(), 0xFF69354E.toInt(), 0xFFF97316.toInt())), // 18:00 Golden Hour
+            Anchor(1320, Palette(0xFF0F0C1B.toInt(), 0xFF1A152F.toInt(), 0xFF7C3AED.toInt())), // 22:00 Twilight Night
+            Anchor(1560, Palette(0xFF07080F.toInt(), 0xFF0B0C15.toInt(), 0xFF4F46E5.toInt()))  // 26:00 (Wraps to 02:00)
+        )
+
+        val adjustedMinute = if (currentMinute < 120) currentMinute + 1440 else currentMinute
+
+        var fromAnchor = anchors[0]
+        var toAnchor = anchors[1]
+
+        for (i in 0 until anchors.size - 1) {
+            if (adjustedMinute >= anchors[i].minuteOfDay && adjustedMinute <= anchors[i + 1].minuteOfDay) {
+                fromAnchor = anchors[i]
+                toAnchor = anchors[i + 1]
+                break
+            }
+        }
+
+        val range = (toAnchor.minuteOfDay - fromAnchor.minuteOfDay).toFloat().coerceAtLeast(1f)
+        val ratio = ((adjustedMinute - fromAnchor.minuteOfDay) / range).coerceIn(0f, 1f)
+
+        return Palette(
+            pillColor = ColorUtils.blendARGB(fromAnchor.palette.pillColor, toAnchor.palette.pillColor, ratio),
+            hexColor = ColorUtils.blendARGB(fromAnchor.palette.hexColor, toAnchor.palette.hexColor, ratio),
+            accentColor = ColorUtils.blendARGB(fromAnchor.palette.accentColor, toAnchor.palette.accentColor, ratio)
+        )
+    }
+
+    private fun renderTintedHand(context: Context, drawableResId: Int, tintColor: Int): Bitmap? {
+        val drawable = ContextCompat.getDrawable(context, drawableResId)?.mutate() ?: return null
+        val density = 3.5f
+        val size = (68 * density).toInt()
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.colorFilter = PorterDuffColorFilter(tintColor, PorterDuff.Mode.SRC_IN)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private fun scheduleNextDaylightTick(context: Context) {
@@ -122,7 +179,7 @@ class SolisWidgetReceiver : AppWidgetProvider() {
                     pendingIntent
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             alarmManager.set(
                 AlarmManager.RTC_WAKEUP,
                 calendar.timeInMillis,
@@ -144,23 +201,6 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         )
         if (pendingIntent != null) {
             alarmManager.cancel(pendingIntent)
-        }
-    }
-
-    private data class DaylightColors(val pillColor: Int, val hexColor: Int, val accentColor: Int)
-
-    private fun getDaylightColors(index: Int): DaylightColors {
-        return when (index) {
-            // Midnight & Indigo (00:00 - 04:30)
-            in 0..9 -> DaylightColors(0xFF0D0F18.toInt(), 0xFF161926.toInt(), 0xFF818CF8.toInt())
-            // Dawn & Sunrise (05:00 - 09:30)
-            in 10..19 -> DaylightColors(0xFFF1E7E3.toInt(), 0xFF52323D.toInt(), 0xFFEA580C.toInt())
-            // High Noon Luminance (10:00 - 14:30)
-            in 20..29 -> DaylightColors(0xFFF0F6FF.toInt(), 0xFF232730.toInt(), 0xFF0284C7.toInt())
-            // Golden Hour & Dusk (15:00 - 19:30)
-            in 30..39 -> DaylightColors(0xFF2B172E.toInt(), 0xFF492452.toInt(), 0xFFF97316.toInt())
-            // Twilight & Nightfall (20:00 - 23:30)
-            else -> DaylightColors(0xFF0F0C1B.toInt(), 0xFF1A152F.toInt(), 0xFF6366F1.toInt())
         }
     }
 
@@ -206,7 +246,7 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
     private fun renderHexBitmap(color: Int): Bitmap {
         val density = 3.5f
-        val size = (66 * density).toInt()
+        val size = (68 * density).toInt()
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
