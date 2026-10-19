@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Medium Minute Hand: 2.2 units wide, longer reach towards edge -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M58.9,14 L61.1,14 L61.1,60 L58.9,60 Z" />
+</vector>
