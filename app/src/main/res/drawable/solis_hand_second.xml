@@ -4,11 +4,11 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- Second Needle: Full edge reach to Y=2 with tail to Y=75, pure bright white -->
+    <!-- Second Needle: Full edge reach to Y=0 with counterbalance tail to Y=80 -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M59.3,2 L60.7,2 L60.7,75 L59.3,75 Z" />
+        android:pathData="M59.1,0 L60.9,0 L60.9,80 L59.1,80 Z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M60,60 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0" />
+        android:pathData="M60,60 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
 </vector>
