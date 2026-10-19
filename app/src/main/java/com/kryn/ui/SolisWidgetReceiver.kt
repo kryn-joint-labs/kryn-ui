@@ -10,7 +10,6 @@ import android.content.Intent
 import android.graphics.*
 import android.os.Build
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import java.util.Calendar
 
@@ -72,19 +71,11 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         val pillBmp = if (showBackground) renderPillBitmap(palette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         val hexBmp = renderHexBitmap(palette.hexColor)
 
-        // Dynamically tint the 2.5x clock hands to match the exact daytime accent color
-        val hourHandBmp = renderTintedHand(context, R.drawable.solis_hand_hour, palette.accentColor)
-        val minuteHandBmp = renderTintedHand(context, R.drawable.solis_hand_minute, palette.accentColor)
-        val secondHandBmp = renderTintedHand(context, R.drawable.solis_hand_second, palette.accentColor)
-
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_solis)
             views.setImageViewBitmap(R.id.solis_pill_bg_img, pillBmp)
             views.setImageViewBitmap(R.id.solis_custom_text_img, textBmp)
             views.setImageViewBitmap(R.id.solis_hex_bg_img, hexBmp)
-
-            // Inject tinted hand bitmaps directly into the AnalogClock
-            if (hourHandBmp != null) views.setImageViewBitmap(R.id.solis_analog_clock, hourHandBmp)
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
@@ -126,19 +117,6 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             hexColor = ColorUtils.blendARGB(fromAnchor.palette.hexColor, toAnchor.palette.hexColor, ratio),
             accentColor = ColorUtils.blendARGB(fromAnchor.palette.accentColor, toAnchor.palette.accentColor, ratio)
         )
-    }
-
-    private fun renderTintedHand(context: Context, drawableResId: Int, tintColor: Int): Bitmap? {
-        val drawable = ContextCompat.getDrawable(context, drawableResId)?.mutate() ?: return null
-        val density = 3.5f
-        val size = (68 * density).toInt()
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.colorFilter = PorterDuffColorFilter(tintColor, PorterDuff.Mode.SRC_IN)
-        drawable.draw(canvas)
-        return bitmap
     }
 
     private fun scheduleNextDaylightTick(context: Context) {
