@@ -4,12 +4,11 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- 2.5x Bold Hour Hand: 14.0 units wide, reaches Y=25, pivots at Y=60 -->
+    <!-- Hour Hand: 2.5x length extension to Y=18 (42 units long), pure bright white -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M53,25 L67,25 L67,60 L53,60 Z" />
-    <!-- Pivot Cap -->
+        android:pathData="M57.6,18 L62.4,18 L62.4,60 L57.6,60 Z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M60,60 m -10,0 a 10,10 0 1,0 20,0 a 10,10 0 1,0 -20,0" />
+        android:pathData="M60,60 m -5.5,0 a 5.5,5.5 0 1,0 11,0 a 5.5,5.5 0 1,0 -11,0" />
 </vector>
