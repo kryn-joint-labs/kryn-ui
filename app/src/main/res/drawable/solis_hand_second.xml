@@ -4,12 +4,11 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- 2.5x Second Needle: 4.0 units wide with full rear counter-weight -->
+    <!-- Second Needle: Full edge reach to Y=2 with tail to Y=75, pure bright white -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M58,6 L62,6 L62,74 L58,74 Z" />
-    <!-- Center Pivot Needle Cap -->
+        android:pathData="M59.3,2 L60.7,2 L60.7,75 L59.3,75 Z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M60,60 m -6,0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" />
+        android:pathData="M60,60 m -2.5,0 a 2.5,2.5 0 1,0 5,0 a 2.5,2.5 0 1,0 -5,0" />
 </vector>
