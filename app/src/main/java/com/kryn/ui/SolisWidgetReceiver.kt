@@ -82,23 +82,23 @@ class SolisWidgetReceiver : AppWidgetProvider() {
     private data class Anchor(val minuteOfDay: Int, val palette: Palette)
 
     private fun computeInterpolatedPalette(currentMinute: Int): Palette {
-        // Continuous 30-min interpolation across key daylight phases
+        // Continuous daylight color progression across 1440 minutes
         val anchors = listOf(
-            // Midnight (02:00) -> Dark Black Hexagon (#08090D)
+            // Midnight (01:30 - 02:30): Dark Black Hexagon (#08090D)
             Anchor(120,  Palette(0xFF07080F.toInt(), 0xFF08090D.toInt(), 0xFF818CF8.toInt())),
-            // Dawn / Morning (06:30) -> Light Peach Orange Hexagon (#FB923C)
-            Anchor(390,  Palette(0xFFFFF8F0.toInt(), 0xFFFB923C.toInt(), 0xFFC2410C.toInt())),
-            // Mid-Morning (09:30) -> Transitioning into Daylight Grey
-            Anchor(570,  Palette(0xFFF8FAFC.toInt(), 0xFFCBD5E1.toInt(), 0xFF0284C7.toInt())),
-            // Apex Noon (12:30) -> Light Grey Hexagon (#E2E8F0)
-            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFFE2E8F0.toInt(), 0xFF1E293B.toInt())),
-            // Afternoon (16:00) -> Starting Warm Sunset Drift
-            Anchor(960,  Palette(0xFFFDEEE8.toInt(), 0xFFF97316.toInt(), 0xFF9A3412.toInt())),
-            // Golden Sunset Evening (18:30) -> Dark Sunset Orange Hexagon (#C2410C)
-            Anchor(1110, Palette(0xFF5C1D2E.toInt(), 0xFFC2410C.toInt(), 0xFFFDBA74.toInt())),
-            // Nightfall (21:30) -> Returning to Deep Obsidian
-            Anchor(1290, Palette(0xFF0F0C1B.toInt(), 0xFF13141C.toInt(), 0xFF6366F1.toInt())),
-            // 26:00 cycle loop (02:00 next day)
+            // Dawn (06:00 - 07:00): Warm Light Orange Hexagon (#FB923C)
+            Anchor(390,  Palette(0xFFFFF7ED.toInt(), 0xFFFB923C.toInt(), 0xFFC2410C.toInt())),
+            // Morning Transition (09:00): Soft Daylight Slate
+            Anchor(540,  Palette(0xFFF8FAFC.toInt(), 0xFF94A3B8.toInt(), 0xFF0284C7.toInt())),
+            // Apex Noon (12:00 - 13:00): Light Grey Hexagon (#D1D5DB)
+            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFFD1D5DB.toInt(), 0xFF1E293B.toInt())),
+            // Late Afternoon (16:00): Warm Glow
+            Anchor(960,  Palette(0xFFFFF1EB.toInt(), 0xFFF97316.toInt(), 0xFF9A3412.toInt())),
+            // Golden Sunset Evening (18:30): Dark Sunset Orange Hexagon (#C2410C)
+            Anchor(1110, Palette(0xFF4A1525.toInt(), 0xFFC2410C.toInt(), 0xFFFDBA74.toInt())),
+            // Twilight (21:00): Shifting to Obsidian
+            Anchor(1260, Palette(0xFF0F0C1B.toInt(), 0xFF171924.toInt(), 0xFF6366F1.toInt())),
+            // Loop Anchor
             Anchor(1560, Palette(0xFF07080F.toInt(), 0xFF08090D.toInt(), 0xFF818CF8.toInt()))
         )
 
@@ -230,37 +230,50 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
     private fun renderHexBitmapWithShadow(color: Int): Bitmap {
         val density = 3.5f
-        val totalSize = (78 * density).toInt()
-        val bitmap = Bitmap.createBitmap(totalSize, totalSize, Bitmap.Config.ARGB_8888)
+        val size = (82 * density).toInt()
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val cx = totalSize / 2f
-        val cy = totalSize / 2f
-        val radius = (33 * density)
+        val cx = size / 2f
+        val cy = size / 2f
+        val radius = (35 * density)
 
-        val path = Path()
+        // 1. Draw Multi-Layered Drop Shadow (Direct Canvas Alpha Simulation)
+        for (i in 4 downTo 1) {
+            val shadowPath = Path()
+            val shadowRadius = radius + (i * 1.5f * density)
+            val shadowCy = cy + (i * 1.2f * density)
+            for (j in 0 until 6) {
+                val angle = Math.toRadians((60 * j - 30).toDouble())
+                val x = (cx + shadowRadius * Math.cos(angle)).toFloat()
+                val y = (shadowCy + shadowRadius * Math.sin(angle)).toFloat()
+                if (j == 0) shadowPath.moveTo(x, y) else shadowPath.lineTo(x, y)
+            }
+            shadowPath.close()
+
+            val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.argb(18 / i, 0, 0, 0)
+                style = Paint.Style.FILL
+            }
+            canvas.drawPath(shadowPath, shadowPaint)
+        }
+
+        // 2. Draw Solid Hexagon Base with Dynamic Daylight Color
+        val hexPath = Path()
         for (i in 0 until 6) {
             val angle = Math.toRadians((60 * i - 30).toDouble())
             val x = (cx + radius * Math.cos(angle)).toFloat()
             val y = (cy + radius * Math.sin(angle)).toFloat()
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+            if (i == 0) hexPath.moveTo(x, y) else hexPath.lineTo(x, y)
         }
-        path.close()
+        hexPath.close()
 
-        // 1. Subtle elevation drop shadow cast over the capsule
-        val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            this.color = Color.TRANSPARENT
-            setShadowLayer(4f * density, 0f, 2f * density, 0x4D000000)
-        }
-        canvas.drawPath(path, shadowPaint)
-
-        // 2. Primary hexagon body
         val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.color = color
             style = Paint.Style.FILL
             isDither = true
         }
-        canvas.drawPath(path, fillPaint)
+        canvas.drawPath(hexPath, fillPaint)
 
         return bitmap
     }
