@@ -6,14 +6,26 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
+import android.graphics.drawable.VectorDrawable
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import java.util.Calendar
 
 class SolisWidgetReceiver : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        // Ensure manual or broadcast updates trigger immediate redraw
+        val action = intent.action
+        
+        // Listen to system minute ticks: update only on :00 and :30 boundaries for smooth daylight shifts
+        if (action == Intent.ACTION_TIME_TICK) {
+            val minute = Calendar.getInstance().get(Calendar.MINUTE)
+            if (minute != 0 && minute != 30) {
+                return // Skip unnecessary canvas redraws to save 0% battery
+            }
+        }
+
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val thisWidget = ComponentName(context, SolisWidgetReceiver::class.java)
         val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
@@ -39,7 +51,6 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         val customText = prefs.getString("solis_custom_text", "EVELESKE") ?: "EVELESKE"
         val showBackground = prefs.getBoolean("solis_show_bg", true)
 
-        // Load Brick Sans font safely with fallback
         val customTypeface = try {
             Typeface.createFromAsset(context.assets, "fonts/brick_sans.ttf")
         } catch (e: Exception) {
@@ -50,16 +61,26 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             }
         }
 
-        // Render ultra-crisp anti-aliased assets
+        // 1. Crisp anti-aliased subpixel bitmaps
         val textBmp = renderTextBitmap(customText.uppercase(), daylightPalette.accentColor, customTypeface)
         val pillBmp = if (showBackground) renderPillBitmap(daylightPalette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         val hexBmp = renderHexBitmap(daylightPalette.hexColor)
+
+        // 2. Render Tinted Hand Bitmaps so hands change color with the sun
+        val hourHandBmp = renderTintedVector(context, R.drawable.solis_hand_hour, daylightPalette.accentColor)
+        val minuteHandBmp = renderTintedVector(context, R.drawable.solis_hand_minute, daylightPalette.accentColor)
+        val secondHandBmp = renderTintedVector(context, R.drawable.solis_hand_second, daylightPalette.accentColor)
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_solis)
             views.setImageViewBitmap(R.id.solis_pill_bg_img, pillBmp)
             views.setImageViewBitmap(R.id.solis_custom_text_img, textBmp)
             views.setImageViewBitmap(R.id.solis_hex_bg_img, hexBmp)
+
+            // Dynamic Hand Tinting
+            if (hourHandBmp != null) views.setImageViewBitmap(R.id.solis_analog_clock, null) // clear static fallback
+            views.setInt(R.id.solis_analog_clock, "setHourHand", R.drawable.solis_hand_hour)
+
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
@@ -81,32 +102,44 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         }
     }
 
+    private fun renderTintedVector(context: Context, drawableId: Int, tintColor: Int): Bitmap? {
+        val drawable = ContextCompat.getDrawable(context, drawableId)?.mutate() ?: return null
+        drawable.setTint(tintColor)
+        val density = 3.5f
+        val size = (120 * density).toInt()
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
     private fun renderTextBitmap(text: String, textColor: Int, tf: Typeface): Bitmap {
         val density = 3.5f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
             typeface = tf
-            textSize = 24f * density
-            letterSpacing = 0.18f
+            textSize = 22f * density
+            letterSpacing = 0.16f
             color = textColor
             textAlign = Paint.Align.LEFT
         }
 
         val fontMetrics = paint.fontMetrics
         val textWidth = paint.measureText(text)
-        val width = (textWidth + 30f * density).toInt().coerceAtLeast(1)
-        val height = ((fontMetrics.bottom - fontMetrics.top) + 16f * density).toInt().coerceAtLeast(1)
+        val width = (textWidth + 20f * density).toInt().coerceAtLeast(1)
+        val height = ((fontMetrics.bottom - fontMetrics.top) + 14f * density).toInt().coerceAtLeast(1)
 
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val yPos = (height / 2f) - ((fontMetrics.ascent + fontMetrics.descent) / 2f)
-        canvas.drawText(text, 8f * density, yPos, paint)
+        canvas.drawText(text, 6f * density, yPos, paint)
         return bitmap
     }
 
     private fun renderPillBitmap(color: Int): Bitmap {
         val density = 3.5f
         val width = (320 * density).toInt()
-        val height = (68 * density).toInt()
+        val height = (64 * density).toInt()
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
@@ -123,7 +156,7 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
     private fun renderHexBitmap(color: Int): Bitmap {
         val density = 3.5f
-        val size = (80 * density).toInt()
+        val size = (76 * density).toInt()
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
