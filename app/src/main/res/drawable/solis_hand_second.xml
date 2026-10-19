@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Razor-thin Second Hand Needle: 1.2 units wide with counterbalance tail -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M59.4,8 L60.6,8 L60.6,68 L59.4,68 Z" />
+
+    <!-- Center Pivot Needle Point -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M60,60 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0" />
+</vector>
