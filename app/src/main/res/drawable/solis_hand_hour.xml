@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="120dp"
-    android:height="120dp"
-    android:viewportWidth="120"
-    android:viewportHeight="120">
-    <!-- Hour Hand: Long reach to Y=12, 5.8 units wide, centered on X=60 -->
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+    <!-- Hour Hand: Extended reach outward to Y=22 (58 units long), 5.4 units wide -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M57.1,12 L62.9,12 L62.9,60 L57.1,60 Z" />
+        android:pathData="M77.3,22 L82.7,22 L82.7,80 L77.3,80 Z" />
+    <!-- Pivot Cap -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M60,60 m -5,0 a 5,5 0 1,0 10,0 a 5,5 0 1,0 -10,0" />
+        android:pathData="M80,80 m -6,0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" />
 </vector>
