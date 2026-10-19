@@ -49,7 +49,6 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         val calendar = Calendar.getInstance()
         val totalMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
 
-        // Mathematical continuous gradient interpolation across the 24-hour cycle
         val palette = computeInterpolatedPalette(totalMinutes)
 
         val prefs = context.getSharedPreferences("kryn_solis_prefs", Context.MODE_PRIVATE)
@@ -66,17 +65,15 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             }
         }
 
-        // Render anti-aliased subpixel bitmaps
         val textBmp = renderTextBitmap(customText.uppercase(), palette.accentColor, customTypeface)
         val pillBmp = if (showBackground) renderPillBitmap(palette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        val hexBmp = renderHexBitmap(palette.hexColor)
+        val hexBmp = renderHexBitmapWithShadow(palette.hexColor)
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_solis)
             views.setImageViewBitmap(R.id.solis_pill_bg_img, pillBmp)
             views.setImageViewBitmap(R.id.solis_custom_text_img, textBmp)
             views.setImageViewBitmap(R.id.solis_hex_bg_img, hexBmp)
-
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
@@ -85,15 +82,24 @@ class SolisWidgetReceiver : AppWidgetProvider() {
     private data class Anchor(val minuteOfDay: Int, val palette: Palette)
 
     private fun computeInterpolatedPalette(currentMinute: Int): Palette {
-        // 6 Peak Anchors across the 24-hour cycle (1440 minutes)
+        // Continuous 30-min interpolation across key daylight phases
         val anchors = listOf(
-            Anchor(120,  Palette(0xFF07080F.toInt(), 0xFF0B0C15.toInt(), 0xFF4F46E5.toInt())), // 02:00 Midnight
-            Anchor(360,  Palette(0xFF34223E.toInt(), 0xFF572F55.toInt(), 0xFFFB7185.toInt())), // 06:00 Sunrise
-            Anchor(540,  Palette(0xFFDCE8F7.toInt(), 0xFF4D5C7A.toInt(), 0xFF0284C7.toInt())), // 09:00 Morning
-            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFF232730.toInt(), 0xFFFBBF24.toInt())), // 12:30 Apex Noon
-            Anchor(1080, Palette(0xFF371F32.toInt(), 0xFF69354E.toInt(), 0xFFF97316.toInt())), // 18:00 Golden Hour
-            Anchor(1320, Palette(0xFF0F0C1B.toInt(), 0xFF1A152F.toInt(), 0xFF7C3AED.toInt())), // 22:00 Twilight Night
-            Anchor(1560, Palette(0xFF07080F.toInt(), 0xFF0B0C15.toInt(), 0xFF4F46E5.toInt()))  // 26:00 (Wraps to 02:00)
+            // Midnight (02:00) -> Dark Black Hexagon (#08090D)
+            Anchor(120,  Palette(0xFF07080F.toInt(), 0xFF08090D.toInt(), 0xFF818CF8.toInt())),
+            // Dawn / Morning (06:30) -> Light Peach Orange Hexagon (#FB923C)
+            Anchor(390,  Palette(0xFFFFF8F0.toInt(), 0xFFFB923C.toInt(), 0xFFC2410C.toInt())),
+            // Mid-Morning (09:30) -> Transitioning into Daylight Grey
+            Anchor(570,  Palette(0xFFF8FAFC.toInt(), 0xFFCBD5E1.toInt(), 0xFF0284C7.toInt())),
+            // Apex Noon (12:30) -> Light Grey Hexagon (#E2E8F0)
+            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFFE2E8F0.toInt(), 0xFF1E293B.toInt())),
+            // Afternoon (16:00) -> Starting Warm Sunset Drift
+            Anchor(960,  Palette(0xFFFDEEE8.toInt(), 0xFFF97316.toInt(), 0xFF9A3412.toInt())),
+            // Golden Sunset Evening (18:30) -> Dark Sunset Orange Hexagon (#C2410C)
+            Anchor(1110, Palette(0xFF5C1D2E.toInt(), 0xFFC2410C.toInt(), 0xFFFDBA74.toInt())),
+            // Nightfall (21:30) -> Returning to Deep Obsidian
+            Anchor(1290, Palette(0xFF0F0C1B.toInt(), 0xFF13141C.toInt(), 0xFF6366F1.toInt())),
+            // 26:00 cycle loop (02:00 next day)
+            Anchor(1560, Palette(0xFF07080F.toInt(), 0xFF08090D.toInt(), 0xFF818CF8.toInt()))
         )
 
         val adjustedMinute = if (currentMinute < 120) currentMinute + 1440 else currentMinute
@@ -222,21 +228,15 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         return bitmap
     }
 
-    private fun renderHexBitmap(color: Int): Bitmap {
+    private fun renderHexBitmapWithShadow(color: Int): Bitmap {
         val density = 3.5f
-        val size = (68 * density).toInt()
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val totalSize = (78 * density).toInt()
+        val bitmap = Bitmap.createBitmap(totalSize, totalSize, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            this.color = color
-            style = Paint.Style.FILL
-            isDither = true
-        }
-
-        val cx = size / 2f
-        val cy = size / 2f
-        val radius = (size / 2f) * 0.94f
+        val cx = totalSize / 2f
+        val cy = totalSize / 2f
+        val radius = (33 * density)
 
         val path = Path()
         for (i in 0 until 6) {
@@ -247,7 +247,21 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         }
         path.close()
 
-        canvas.drawPath(path, paint)
+        // 1. Subtle elevation drop shadow cast over the capsule
+        val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = Color.TRANSPARENT
+            setShadowLayer(4f * density, 0f, 2f * density, 0x4D000000)
+        }
+        canvas.drawPath(path, shadowPaint)
+
+        // 2. Primary hexagon body
+        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = color
+            style = Paint.Style.FILL
+            isDither = true
+        }
+        canvas.drawPath(path, fillPaint)
+
         return bitmap
     }
 }
