@@ -4,11 +4,11 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- Hour Hand: 2.5x length extension to Y=18 (42 units long), pure bright white -->
+    <!-- Hour Hand: Long reach to Y=12, 5.8 units wide, centered on X=60 -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M57.6,18 L62.4,18 L62.4,60 L57.6,60 Z" />
+        android:pathData="M57.1,12 L62.9,12 L62.9,60 L57.1,60 Z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M60,60 m -5.5,0 a 5.5,5.5 0 1,0 11,0 a 5.5,5.5 0 1,0 -11,0" />
+        android:pathData="M60,60 m -5,0 a 5,5 0 1,0 10,0 a 5,5 0 1,0 -10,0" />
 </vector>
