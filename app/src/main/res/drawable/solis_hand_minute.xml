@@ -4,8 +4,8 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- 2.5x Sleek Minute Hand: 8.0 units wide, reaches Y=10, pivots at Y=60 -->
+    <!-- Minute Hand: Reaches Y=4 (56 units long, near bezel edge), pure bright white -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M56,10 L64,10 L64,60 L56,60 Z" />
+        android:pathData="M58.7,4 L61.3,4 L61.3,60 L58.7,60 Z" />
 </vector>
