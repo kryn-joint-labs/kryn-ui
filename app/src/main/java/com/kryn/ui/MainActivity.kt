@@ -80,10 +80,10 @@ fun requestBatteryExemptionIfNeeded(context: Context) {
 fun pinWidgetToHomeScreen(context: Context, widgetName: String) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val appWidgetManager = context.getSystemService(AppWidgetManager::class.java)
-        val receiverClass = if (widgetName.contains("VELVET", ignoreCase = true)) {
-            VelvetWidgetReceiver::class.java
-        } else {
-            LunarWidgetReceiver::class.java
+        val receiverClass = when {
+            widgetName.contains("SOLIS", ignoreCase = true) -> SolisWidgetReceiver::class.java
+            widgetName.contains("VELVET", ignoreCase = true) -> VelvetWidgetReceiver::class.java
+            else -> LunarWidgetReceiver::class.java
         }
         val myProvider = ComponentName(context, receiverClass)
 
@@ -118,6 +118,7 @@ sealed class Screen {
     object AllCategories : Screen()
     data class CategoryDetail(val category: CategoryItem) : Screen()
     data class VelvetCustomizer(val widget: WidgetItem) : Screen()
+    data class SolisCustomizer(val widget: WidgetItem) : Screen()
 }
 
 @Composable
@@ -127,6 +128,7 @@ fun KrynStorefrontApp() {
 
     val categories = remember {
         listOf(
+            CategoryItem("live_lights", "LIVE LIGHTS", "CHROMATIC 24H", "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&q=80"),
             CategoryItem("minimal", "MINIMAL", "SLATE & MONO", "https://images.unsplash.com/photo-1507499739999-097706ad8914?w=600&q=80"),
             CategoryItem("anime", "ANIME", "INK & CHERRY", "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&q=80"),
             CategoryItem("cyber", "CYBER", "RACE TELEMETRY", "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"),
@@ -136,6 +138,13 @@ fun KrynStorefrontApp() {
 
     val signatureWidgets = remember {
         listOf(
+            WidgetItem(
+                name = "KRYN // SOLIS",
+                tag = "SOLIS CAPSULE",
+                format = "4x1 // REVISION 1.0",
+                category = "live_lights",
+                imageRes = R.drawable.preview_velvet // Fallback until user screenshots Solis
+            ),
             WidgetItem(
                 name = "KRYN // LUNAR",
                 tag = "STENCIL CHRONO",
@@ -155,6 +164,7 @@ fun KrynStorefrontApp() {
 
     BackHandler(enabled = currentScreen !is Screen.Home) {
         currentScreen = when (currentScreen) {
+            is Screen.SolisCustomizer -> Screen.Home
             is Screen.VelvetCustomizer -> Screen.Home
             is Screen.CategoryDetail -> Screen.AllCategories
             is Screen.AllCategories -> Screen.Home
@@ -191,10 +201,16 @@ fun KrynStorefrontApp() {
                             onViewAllCategories = { currentScreen = Screen.AllCategories },
                             onSelectCategory = { category -> currentScreen = Screen.CategoryDetail(category) },
                             onWidgetApply = { widget ->
-                                if (widget.name.contains("VELVET", ignoreCase = true)) {
-                                    currentScreen = Screen.VelvetCustomizer(widget)
-                                } else {
-                                    pinWidgetToHomeScreen(context, widget.name)
+                                when {
+                                    widget.name.contains("SOLIS", ignoreCase = true) -> {
+                                        currentScreen = Screen.SolisCustomizer(widget)
+                                    }
+                                    widget.name.contains("VELVET", ignoreCase = true) -> {
+                                        currentScreen = Screen.VelvetCustomizer(widget)
+                                    }
+                                    else -> {
+                                        pinWidgetToHomeScreen(context, widget.name)
+                                    }
                                 }
                             }
                         )
@@ -212,10 +228,16 @@ fun KrynStorefrontApp() {
                             widgets = signatureWidgets.filter { it.category.equals(targetScreen.category.id, ignoreCase = true) },
                             onBack = { currentScreen = Screen.AllCategories },
                             onWidgetApply = { widget ->
-                                if (widget.name.contains("VELVET", ignoreCase = true)) {
-                                    currentScreen = Screen.VelvetCustomizer(widget)
-                                } else {
-                                    pinWidgetToHomeScreen(context, widget.name)
+                                when {
+                                    widget.name.contains("SOLIS", ignoreCase = true) -> {
+                                        currentScreen = Screen.SolisCustomizer(widget)
+                                    }
+                                    widget.name.contains("VELVET", ignoreCase = true) -> {
+                                        currentScreen = Screen.VelvetCustomizer(widget)
+                                    }
+                                    else -> {
+                                        pinWidgetToHomeScreen(context, widget.name)
+                                    }
                                 }
                             }
                         )
@@ -226,7 +248,227 @@ fun KrynStorefrontApp() {
                             onBack = { currentScreen = Screen.Home }
                         )
                     }
+                    is Screen.SolisCustomizer -> {
+                        SolisCustomizerScreen(
+                            widget = targetScreen.widget,
+                            onBack = { currentScreen = Screen.Home }
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun SolisCustomizerScreen(
+    widget: WidgetItem,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("kryn_solis_prefs", Context.MODE_PRIVATE) }
+
+    var customText by remember {
+        mutableStateOf(prefs.getString("solis_custom_text", "KRYN // 01") ?: "KRYN // 01")
+    }
+    var showBg by remember {
+        mutableStateOf(prefs.getBoolean("solis_show_bg", true))
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentPadding = PaddingValues(top = 44.dp, bottom = 40.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "← CANCEL",
+                    color = Color(0xFFE10600),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MonoBrandFont,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onBack() }
+                        .padding(8.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "CONFIGURE SOLIS",
+                    color = Color(0xFF0F1117),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp,
+                    fontFamily = CondensedDisplayFont
+                )
+            }
+        }
+
+        // Live Preview Box (Shows 4x1 Capsule + Hexagon Dial)
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color(0xFF0D0E12))
+                    .border(1.dp, Color(0xFF22242B), RoundedCornerShape(22.dp))
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    // Pill Capsule
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .padding(end = 26.dp)
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(if (showBg) Color(0xFF232730) else Color.Transparent)
+                            .border(
+                                width = 1.dp,
+                                color = if (showBg) Color(0x33FFFFFF) else Color.Transparent,
+                                shape = RoundedCornerShape(999.dp)
+                            )
+                            .padding(start = 20.dp, end = 30.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = if (customText.isBlank()) "KRYN // 01" else customText.uppercase(),
+                            color = Color(0xFFFBBF24),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MonoBrandFont,
+                            letterSpacing = 1.2.sp
+                        )
+                    }
+
+                    // Hexagon Analog Clock Dock (Right overlap)
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .align(Alignment.CenterEnd)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFF161926))
+                            .border(1.dp, Color(0x33FBBF24), RoundedCornerShape(14.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "⏱",
+                            fontSize = 24.sp
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "ENGINE: NAP (Daylight Chromatic 48-Phases) + LTC Analog Core",
+                color = Color(0xFF6B7280),
+                fontSize = 10.sp,
+                fontFamily = MonoBrandFont
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Field 1: Custom Text Input
+        item {
+            Text(
+                text = "CAPSULE TEXT (MAX 14 CHARACTERS)",
+                color = Color(0xFF0F1117),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontFamily = MonoBrandFont
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = customText,
+                onValueChange = { if (it.length <= 14) customText = it },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                placeholder = { Text("e.g. ASTON MARTIN, KRYN // 01") }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // Field 2: Translucent Capsule Background Toggle
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White)
+                    .border(1.dp, Color(0xFFE2E4E9), RoundedCornerShape(14.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "CAPSULE PILL CONTAINER",
+                        color = Color(0xFF0F1117),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MonoBrandFont
+                    )
+                    Text(
+                        text = if (showBg) "Translucent pill visible" else "Floating text (no container)",
+                        color = Color(0xFF6B7280),
+                        fontSize = 11.sp,
+                        fontFamily = CleanSansFont
+                    )
+                }
+                Switch(
+                    checked = showBg,
+                    onCheckedChange = { showBg = it }
+                )
+            }
+            Spacer(modifier = Modifier.height(30.dp))
+        }
+
+        // Save & Pin Button
+        item {
+            Button(
+                onClick = {
+                    prefs.edit()
+                        .putString("solis_custom_text", customText.ifBlank { "KRYN // 01" })
+                        .putBoolean("solis_show_bg", showBg)
+                        .apply()
+
+                    // Broadcast immediately to update widget on home screen
+                    val updateIntent = Intent(context, SolisWidgetReceiver::class.java).apply {
+                        action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                    }
+                    context.sendBroadcast(updateIntent)
+
+                    pinWidgetToHomeScreen(context, widget.name)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F1117)),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(
+                    text = "SAVE & PIN TO HOME SCREEN",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MonoBrandFont,
+                    letterSpacing = 1.sp
+                )
             }
         }
     }
@@ -495,7 +737,7 @@ fun HomeScreen(
                             )
                         }
                         Text(
-                            text = "BY KRYN JOINT LABS // ENGINE v1.2",
+                            text = "BY KRYN JOINT LABS // ENGINE v1.4.1",
                             color = Color(0xFFE10600),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
@@ -659,7 +901,7 @@ fun HomeScreen(
                         fontFamily = CondensedDisplayFont
                     )
                     Text(
-                        text = "v1.2 ACTIVE",
+                        text = "v1.4.1 ACTIVE",
                         color = Color(0xFFE10600),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
@@ -694,7 +936,7 @@ fun HomeScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "DROP // 03 IN PRODUCTION",
+                            text = "DROP // 04 IN PRODUCTION",
                             color = Color(0xFF0F1117),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
