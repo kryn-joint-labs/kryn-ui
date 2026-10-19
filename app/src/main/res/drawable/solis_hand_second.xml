@@ -4,10 +4,10 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- Needle Second Hand: Reaches Y=10 with tail to Y=72, 1.8 units wide -->
+    <!-- Needle Second Hand: 1.8 units wide, reaches Y=9 with tail to Y=72 -->
     <path
         android:fillColor="#FBBF24"
-        android:pathData="M59.1,10 L60.9,10 L60.9,72 L59.1,72 Z" />
+        android:pathData="M59.1,9 L60.9,9 L60.9,72 L59.1,72 Z" />
     <path
         android:fillColor="#FBBF24"
         android:pathData="M60,60 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
