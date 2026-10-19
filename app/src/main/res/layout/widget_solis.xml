@@ -2,67 +2,46 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:padding="4dp">
 
-    <!-- 1. THE HORIZONTAL CAPSULE PILL (STRETCHES ACROSS WITH RIGHT OFFSET) -->
-    <RelativeLayout
-        android:id="@+id/solis_pill_container"
+    <!-- 1. CAPSULE PILL BACKGROUND -->
+    <ImageView
+        android:id="@+id/solis_pill_bg_img"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="18dp"
+        android:scaleType="fitXY" />
+
+    <!-- 2. CUSTOM TEXT AREA (BRICK SANS) -->
+    <ImageView
+        android:id="@+id/solis_custom_text_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="32dp">
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="76dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitStart" />
 
-        <!-- CAPSULE BACKGROUND (DYNAMICALLY TINTED BY NAP ENGINE) -->
-        <ImageView
-            android:id="@+id/solis_pill_bg_img"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/solis_pill_bg"
-            android:scaleType="fitXY" />
-
-        <!-- CUSTOM TEXT (LEFT-ALIGNED WITH GENEROUS PADDING) -->
-        <ImageView
-            android:id="@+id/solis_custom_text_img"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="48dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter" />
-
-    </RelativeLayout>
-
-    <!-- 2. THE OVERLAPPING HEXAGON ANALOG CLOCK DOCKED ON THE RIGHT -->
-    <RelativeLayout
-        android:id="@+id/solis_clock_dock"
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+    <!-- 3. OVERLAPPING HEXAGON BADGE -->
+    <ImageView
+        android:id="@+id/solis_hex_bg_img"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true">
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter" />
 
-        <!-- HEXAGON BACKGROUND DOCK (DYNAMICALLY TINTED BY NAP ENGINE) -->
-        <ImageView
-            android:id="@+id/solis_hex_bg_img"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/solis_hex_dial"
-            android:scaleType="fitCenter" />
-
-        <!-- LTC ENGINE: NATIVE ANDROID ANALOG CLOCK (0ms LAG, 0% EXTRA BATTERY) -->
-        <AnalogClock
-            android:id="@+id/solis_analog_clock"
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:layout_centerInParent="true"
-            android:hand_hour="@drawable/solis_hand_hour"
-            android:hand_minute="@drawable/solis_hand_minute"
-            android:hand_second="@drawable/solis_hand_second" />
-
-    </RelativeLayout>
+    <!-- 4. REAL-TIME HARDWARE ANALOG CLOCK (LTC ENGINE) -->
+    <AnalogClock
+        android:id="@+id/solis_analog_clock"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:hand_hour="@drawable/solis_hand_hour"
+        android:hand_minute="@drawable/solis_hand_minute"
+        android:hand_second="@drawable/solis_hand_second" />
 
 </RelativeLayout>
