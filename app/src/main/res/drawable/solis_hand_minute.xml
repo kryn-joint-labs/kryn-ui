@@ -4,8 +4,8 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- Minute Hand: Reaches Y=4 (56 units long, near bezel edge), pure bright white -->
+    <!-- Minute Hand: Absolute edge reach to Y=0, 3.2 units wide -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M58.7,4 L61.3,4 L61.3,60 L58.7,60 Z" />
+        android:pathData="M58.4,0 L61.6,0 L61.6,60 L58.4,60 Z" />
 </vector>
