@@ -1,37 +1,42 @@
 package com.kryn.ui
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
-import android.graphics.drawable.VectorDrawable
+import android.os.Build
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import java.util.Calendar
 
 class SolisWidgetReceiver : AppWidgetProvider() {
 
+    companion object {
+        const val ACTION_SOLIS_TICK = "com.kryn.ui.ACTION_SOLIS_TICK"
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        val action = intent.action
-        
-        // Listen to system minute ticks: update only on :00 and :30 boundaries for smooth daylight shifts
-        if (action == Intent.ACTION_TIME_TICK) {
-            val minute = Calendar.getInstance().get(Calendar.MINUTE)
-            if (minute != 0 && minute != 30) {
-                return // Skip unnecessary canvas redraws to save 0% battery
-            }
-        }
-
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val thisWidget = ComponentName(context, SolisWidgetReceiver::class.java)
         val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
+        
         if (appWidgetIds.isNotEmpty()) {
             onUpdate(context, appWidgetManager, appWidgetIds)
         }
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        scheduleNextDaylightTick(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        cancelDaylightTick(context)
     }
 
     override fun onUpdate(
@@ -39,6 +44,9 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        // Schedule next :00 or :30 boundary
+        scheduleNextDaylightTick(context)
+
         val calendar = Calendar.getInstance()
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
@@ -51,6 +59,7 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         val customText = prefs.getString("solis_custom_text", "EVELESKE") ?: "EVELESKE"
         val showBackground = prefs.getBoolean("solis_show_bg", true)
 
+        // Load Brick Sans font safely
         val customTypeface = try {
             Typeface.createFromAsset(context.assets, "fonts/brick_sans.ttf")
         } catch (e: Exception) {
@@ -61,27 +70,80 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             }
         }
 
-        // 1. Crisp anti-aliased subpixel bitmaps
+        // Render Ultra-Crisp Anti-Aliased Subpixel Bitmaps
         val textBmp = renderTextBitmap(customText.uppercase(), daylightPalette.accentColor, customTypeface)
         val pillBmp = if (showBackground) renderPillBitmap(daylightPalette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         val hexBmp = renderHexBitmap(daylightPalette.hexColor)
-
-        // 2. Render Tinted Hand Bitmaps so hands change color with the sun
-        val hourHandBmp = renderTintedVector(context, R.drawable.solis_hand_hour, daylightPalette.accentColor)
-        val minuteHandBmp = renderTintedVector(context, R.drawable.solis_hand_minute, daylightPalette.accentColor)
-        val secondHandBmp = renderTintedVector(context, R.drawable.solis_hand_second, daylightPalette.accentColor)
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_solis)
             views.setImageViewBitmap(R.id.solis_pill_bg_img, pillBmp)
             views.setImageViewBitmap(R.id.solis_custom_text_img, textBmp)
             views.setImageViewBitmap(R.id.solis_hex_bg_img, hexBmp)
-
-            // Dynamic Hand Tinting
-            if (hourHandBmp != null) views.setImageViewBitmap(R.id.solis_analog_clock, null) // clear static fallback
-            views.setInt(R.id.solis_analog_clock, "setHourHand", R.drawable.solis_hand_hour)
-
             appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+    }
+
+    private fun scheduleNextDaylightTick(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        val intent = Intent(context, SolisWidgetReceiver::class.java).apply {
+            action = ACTION_SOLIS_TICK
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            2001,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val calendar = Calendar.getInstance()
+        val minute = calendar.get(Calendar.MINUTE)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        if (minute < 30) {
+            calendar.set(Calendar.MINUTE, 30)
+        } else {
+            calendar.add(Calendar.HOUR_OF_DAY, 1)
+            calendar.set(Calendar.MINUTE, 0)
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
+            }
+        } catch (e: Exception) {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        }
+    }
+
+    private fun cancelDaylightTick(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        val intent = Intent(context, SolisWidgetReceiver::class.java).apply {
+            action = ACTION_SOLIS_TICK
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            2001,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        if (pendingIntent != null) {
+            alarmManager.cancel(pendingIntent)
         }
     }
 
@@ -93,32 +155,20 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             in 0..9 -> DaylightColors(0xFF0D0F18.toInt(), 0xFF161926.toInt(), 0xFF818CF8.toInt())
             // Dawn & Sunrise (05:00 - 09:30)
             in 10..19 -> DaylightColors(0xFFF1E7E3.toInt(), 0xFF52323D.toInt(), 0xFFEA580C.toInt())
-            // Noon Luminance (10:00 - 14:30)
+            // High Noon Luminance (10:00 - 14:30)
             in 20..29 -> DaylightColors(0xFFF0F6FF.toInt(), 0xFF232730.toInt(), 0xFF0284C7.toInt())
-            // Dusk & Golden Hour (15:00 - 19:30)
+            // Golden Hour & Dusk (15:00 - 19:30)
             in 30..39 -> DaylightColors(0xFF2B172E.toInt(), 0xFF492452.toInt(), 0xFFF97316.toInt())
-            // Nightfall (20:00 - 23:30)
+            // Twilight & Nightfall (20:00 - 23:30)
             else -> DaylightColors(0xFF0F0C1B.toInt(), 0xFF1A152F.toInt(), 0xFF6366F1.toInt())
         }
-    }
-
-    private fun renderTintedVector(context: Context, drawableId: Int, tintColor: Int): Bitmap? {
-        val drawable = ContextCompat.getDrawable(context, drawableId)?.mutate() ?: return null
-        drawable.setTint(tintColor)
-        val density = 3.5f
-        val size = (120 * density).toInt()
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
     }
 
     private fun renderTextBitmap(text: String, textColor: Int, tf: Typeface): Bitmap {
         val density = 3.5f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.SUBPIXEL_TEXT_FLAG).apply {
             typeface = tf
-            textSize = 22f * density
+            textSize = 21f * density
             letterSpacing = 0.16f
             color = textColor
             textAlign = Paint.Align.LEFT
@@ -126,13 +176,13 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
         val fontMetrics = paint.fontMetrics
         val textWidth = paint.measureText(text)
-        val width = (textWidth + 20f * density).toInt().coerceAtLeast(1)
-        val height = ((fontMetrics.bottom - fontMetrics.top) + 14f * density).toInt().coerceAtLeast(1)
+        val width = (textWidth + 24f * density).toInt().coerceAtLeast(32)
+        val height = ((fontMetrics.bottom - fontMetrics.top) + 12f * density).toInt().coerceAtLeast(16)
 
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val yPos = (height / 2f) - ((fontMetrics.ascent + fontMetrics.descent) / 2f)
-        canvas.drawText(text, 6f * density, yPos, paint)
+        canvas.drawText(text, 4f * density, yPos, paint)
         return bitmap
     }
 
@@ -156,7 +206,7 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
     private fun renderHexBitmap(color: Int): Bitmap {
         val density = 3.5f
-        val size = (76 * density).toInt()
+        val size = (66 * density).toInt()
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
