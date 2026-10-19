@@ -4,11 +4,11 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-    <!-- Bold Hour Hand: Reaches Y=34 (56% length), 5.5 units wide -->
+    <!-- Bold Hour Hand: 5.6 units wide, reaches Y=33, pivots at Y=60 -->
     <path
         android:fillColor="#FBBF24"
-        android:pathData="M57.2,34 L62.8,34 L62.8,60 L57.2,60 Z" />
-    <!-- Center Pivot Cap -->
+        android:pathData="M57.2,33 L62.8,33 L62.8,60 L57.2,60 Z" />
+    <!-- Pivot Cap -->
     <path
         android:fillColor="#FBBF24"
         android:pathData="M60,60 m -5,0 a 5,5 0 1,0 10,0 a 5,5 0 1,0 -10,0" />
