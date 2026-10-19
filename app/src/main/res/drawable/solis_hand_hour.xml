@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Bold Hour Hand: 4.0 units wide, centered at X=60, pivots at Y=60 -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M58,26 L62,26 L62,60 L58,60 Z" />
+
+    <!-- Center Pivot Cap -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M60,60 m -4,0 a 4,4 0 1,0 8,0 a 4,4 0 1,0 -8,0" />
+</vector>
