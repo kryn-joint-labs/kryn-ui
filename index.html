@@ -33,7 +33,7 @@
       font-size: 11px;
       font-family: monospace;
       letter-spacing: 2px;
-      padding: 9px 24px;
+      padding: 10px 24px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -46,9 +46,15 @@
       display: inline-block;
       width: 7px;
       height: 7px;
-      background-color: #e10600;
+      background-color: #10b981;
       border-radius: 50%;
-      box-shadow: 0 0 10px #e10600;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
     }
 
     /* ===================================================
@@ -62,6 +68,7 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #e5e5e5;
+      transition: all 0.3s ease;
     }
 
     .brand-group {
@@ -73,7 +80,7 @@
     .brand-nav-logo {
       height: 32px;
       width: auto;
-      border-radius: 6px;
+      border-radius: 8px;
     }
 
     .brand-logo {
@@ -99,15 +106,16 @@
     }
 
     /* ===================================================
-       HERO SECTION (DARK THEME)
+       HERO SECTION (DARK THEME WITH ANIMATIONS)
        =================================================== */
     .hero-section {
-      background: radial-gradient(circle at 80% 20%, rgba(225, 6, 0, 0.08) 0%, rgba(9, 10, 15, 1) 70%);
+      background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, rgba(9, 10, 15, 1) 75%);
       padding: 70px 48px 40px;
       min-height: calc(100vh - 120px);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      position: relative;
     }
 
     .hero-body {
@@ -123,12 +131,13 @@
     .hero-content {
       flex: 1.1;
       max-width: 640px;
+      animation: fadeInUp 0.8s ease-out forwards;
     }
 
     .hero-eyebrow {
       font-size: 11px;
       font-family: monospace;
-      color: #e10600;
+      color: #a0a4ab;
       letter-spacing: 2.5px;
       font-weight: 800;
       text-transform: uppercase;
@@ -166,6 +175,11 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-2px);
     }
 
     .feature-item i {
@@ -186,12 +200,13 @@
       margin-top: 2px;
     }
 
-    /* Hero Graphic 3D Mockup */
+    /* 3D Interactive Mockup */
     .hero-visual {
       flex: 1;
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      animation: floatDeskmat 6s ease-in-out infinite;
     }
 
     .deskmat-mockup {
@@ -205,19 +220,20 @@
         inset 0 0 0 1px rgba(255, 255, 255, 0.18);
       position: relative;
       transform: perspective(1000px) rotateX(12deg) rotateY(-8deg) rotateZ(2deg);
-      transition: transform 0.4s ease;
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .deskmat-mockup:hover {
-      transform: perspective(1000px) rotateX(6deg) rotateY(-3deg) translateY(-6px);
+      transform: perspective(1000px) rotateX(4deg) rotateY(-2deg) translateY(-8px);
     }
 
     .mockup-tag {
       position: absolute;
       top: 16px;
       right: 16px;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       padding: 6px 14px;
       border-radius: 6px;
       font-size: 10px;
@@ -226,6 +242,17 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       font-family: monospace;
       color: #ffffff;
+    }
+
+    /* Floating keyframe */
+    @keyframes floatDeskmat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Scroll Prompt */
@@ -248,11 +275,12 @@
       text-transform: uppercase;
       font-weight: 700;
       text-decoration: none;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, transform 0.2s ease;
     }
 
     .scroll-down-btn:hover {
       color: #ffffff;
+      transform: translateY(2px);
     }
 
     .scroll-icon {
@@ -267,7 +295,7 @@
     }
 
     /* ===================================================
-       DOWNLOAD TARGET SECTION (LIGHT THEME)
+       DOWNLOAD TARGET SECTION (CERAMIC LIGHT THEME)
        =================================================== */
     .download-section {
       background: #ffffff;
@@ -298,7 +326,6 @@
       letter-spacing: -0.6px;
     }
 
-    /* Download Card */
     .download-card {
       max-width: 860px;
       margin: 0 auto;
@@ -307,6 +334,11 @@
       border-radius: 26px;
       padding: 36px;
       box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .download-card:hover {
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.1);
     }
 
     .apk-card-grid {
@@ -347,9 +379,9 @@
       font-weight: 800;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: #e10600;
-      background: rgba(225, 6, 0, 0.08);
-      border: 1px solid rgba(225, 6, 0, 0.2);
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
       padding: 4px 10px;
       border-radius: 6px;
       margin-bottom: 8px;
@@ -385,18 +417,17 @@
     }
 
     .counter-tag {
-      color: #16a34a;
+      color: #10b981;
       font-weight: bold;
       font-family: monospace;
     }
 
-    /* Native Download Action Button */
     .download-action-btn {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 12px;
-      background: #000000;
+      background: #0f1117;
       color: #ffffff;
       text-decoration: none;
       font-weight: 800;
@@ -404,19 +435,20 @@
       letter-spacing: 0.5px;
       padding: 18px;
       border-radius: 16px;
-      transition: background 0.2s ease, transform 0.1s ease;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       cursor: pointer;
       width: 100%;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
 
     .download-action-btn:hover {
-      background: #1f2024;
-      transform: translateY(-1px);
+      background: #23262f;
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
     }
 
     /* ===================================================
-       WHAT'S NEW (CHANGELOG)
+       WHAT'S NEW (RELEASE CHANGELOG)
        =================================================== */
     .section-wrapper-dark {
       background: #090a0f;
@@ -432,6 +464,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 22px;
       padding: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
     .changelog-item {
@@ -473,13 +506,19 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       padding: 24px;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .engine-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.25);
     }
 
     .engine-badge {
       font-family: monospace;
       font-size: 10px;
       font-weight: 800;
-      color: #e10600;
+      color: #10b981;
       letter-spacing: 1.5px;
       margin-bottom: 8px;
       text-transform: uppercase;
@@ -512,7 +551,7 @@
     .footer-divider {
       width: 44px;
       height: 2px;
-      background: #e10600;
+      background: #3f3f46;
       margin: 0 auto 20px;
     }
 
@@ -537,7 +576,7 @@
       font-family: monospace;
       font-size: 11px;
       font-weight: 700;
-      color: #e10600;
+      color: #a1a1aa;
       letter-spacing: 1.5px;
     }
 
@@ -613,7 +652,7 @@
 </head>
 <body>
 
-  <!-- Top Black Status Bar Ticker -->
+  <!-- Top Status Bar Ticker -->
   <div class="top-bar">
     <span class="build-status"></span>
     <span>OFFICIAL ARCHIVE • DIRECT ANDROID MANIFEST SYSTEM • CLEAN APK RELEASE</span>
@@ -631,7 +670,7 @@
     </div>
   </header>
 
-  <!-- Hero Section (Dark Theme with 3D Perspective Deskmat Mockup) -->
+  <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-body">
       <div class="hero-content">
@@ -671,7 +710,7 @@
         </div>
       </div>
 
-      <!-- Graphic Canvas 3D Mockup -->
+      <!-- Graphic Canvas 3D Animated Mockup -->
       <div class="hero-visual">
         <div class="deskmat-mockup">
           <span class="mockup-tag">KRYN UI v1.4.1 STABLE</span>
@@ -688,7 +727,7 @@
     </div>
   </section>
 
-  <!-- Download APK Destination (Light Ceramic Theme) -->
+  <!-- Download APK Destination (Ceramic Light Theme) -->
   <section class="download-section" id="download-area">
     <div class="section-header">
       <p class="section-eyebrow">READY TO INSTALL</p>
@@ -772,7 +811,7 @@
   <!-- About Section: Kryn UI Engine Directory -->
   <section class="section-wrapper-dark" style="border-top: none; padding-top: 0;">
     <div class="section-header">
-      <p class="section-eyebrow" style="color: #e10600;">TECHNICAL ARCHITECTURE</p>
+      <p class="section-eyebrow" style="color: #90949d;">TECHNICAL ARCHITECTURE</p>
       <h2 class="section-title" style="color: #ffffff;">The Kryn UI Engine Directory</h2>
     </div>
 
@@ -831,7 +870,6 @@
     const KEY = 'apk-downloads';
     const BASE_URL = 'https://api.counterapi.dev/v1';
 
-    // 1. Fetch live download count on load
     async function fetchDownloadCount() {
       const counterEl = document.getElementById('liveDownloadCount');
       if (!counterEl) return;
@@ -851,7 +889,6 @@
 
     window.addEventListener('DOMContentLoaded', fetchDownloadCount);
 
-    // 2. Button Animation & Counter Increment
     async function handleDownloadEvent() {
       const btn = document.getElementById('dlBtn');
       const counterEl = document.getElementById('liveDownloadCount');
@@ -876,11 +913,11 @@
 
       setTimeout(() => {
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Download Started!';
-        btn.style.backgroundColor = '#16a34a';
+        btn.style.backgroundColor = '#10b981';
 
         setTimeout(() => {
           btn.innerHTML = originalHTML;
-          btn.style.backgroundColor = '#000000';
+          btn.style.backgroundColor = '#0f1117';
         }, 3000);
       }, 600);
     }
