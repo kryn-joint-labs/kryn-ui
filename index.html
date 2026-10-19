@@ -7,8 +7,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     /* ===================================================
-       GLOBAL RESET & TYPOGRAPHY
+       GLOBAL RESET, SMOOTH SCROLL & FONTS
        =================================================== */
+    html {
+      scroll-behavior: smooth;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -24,21 +28,34 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* Scroll-Driven Reveal Animations */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     /* ===================================================
-       TOP STATUS BAR TICKER
+       TOP SYSTEM STATUS BAR (CLEAN STEALTH)
        =================================================== */
     .top-bar {
       background-color: #000000;
-      color: #90949d;
-      font-size: 11px;
-      font-family: monospace;
+      color: #717682;
+      font-size: 10.5px;
+      font-family: 'JetBrains Mono', monospace, sans-serif;
       letter-spacing: 2px;
       padding: 10px 24px;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       text-transform: uppercase;
     }
 
@@ -46,19 +63,13 @@
       display: inline-block;
       width: 7px;
       height: 7px;
-      background-color: #10b981;
+      background-color: #22c55e;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
-      animation: pulseGlow 2.5s infinite ease-in-out;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { transform: scale(1); opacity: 0.8; }
-      50% { transform: scale(1.3); opacity: 1; }
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
     }
 
     /* ===================================================
-       HEADER NAVIGATION
+       WHITE NAVIGATION HEADER
        =================================================== */
     header {
       background-color: #ffffff;
@@ -68,7 +79,6 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #e5e5e5;
-      transition: all 0.3s ease;
     }
 
     .brand-group {
@@ -80,7 +90,7 @@
     .brand-nav-logo {
       height: 32px;
       width: auto;
-      border-radius: 8px;
+      border-radius: 6px;
     }
 
     .brand-logo {
@@ -106,16 +116,15 @@
     }
 
     /* ===================================================
-       HERO SECTION (DARK THEME WITH ANIMATIONS)
+       HERO SECTION
        =================================================== */
     .hero-section {
-      background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, rgba(9, 10, 15, 1) 75%);
+      background: radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.04) 0%, rgba(9, 10, 15, 1) 70%);
       padding: 70px 48px 40px;
       min-height: calc(100vh - 120px);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      position: relative;
     }
 
     .hero-body {
@@ -131,15 +140,14 @@
     .hero-content {
       flex: 1.1;
       max-width: 640px;
-      animation: fadeInUp 0.8s ease-out forwards;
     }
 
     .hero-eyebrow {
       font-size: 11px;
       font-family: monospace;
-      color: #a0a4ab;
+      color: #94a3b8;
       letter-spacing: 2.5px;
-      font-weight: 800;
+      font-weight: 700;
       text-transform: uppercase;
       margin-bottom: 16px;
       display: flex;
@@ -153,6 +161,7 @@
       line-height: 1.12;
       letter-spacing: -1.2px;
       margin-bottom: 20px;
+      color: #ffffff;
     }
 
     .hero-subtitle {
@@ -168,23 +177,18 @@
       display: flex;
       gap: 32px;
       padding-top: 28px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .feature-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: transform 0.3s ease;
-    }
-
-    .feature-item:hover {
-      transform: translateY(-2px);
     }
 
     .feature-item i {
       font-size: 20px;
-      color: #a0a4ab;
+      color: #94a3b8;
       flex-shrink: 0;
     }
 
@@ -196,17 +200,16 @@
 
     .feature-text p {
       font-size: 11px;
-      color: #727780;
+      color: #64748b;
       margin-top: 2px;
     }
 
-    /* 3D Interactive Mockup */
+    /* 3D Perspective Graphic Canvas Mockup */
     .hero-visual {
       flex: 1;
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      animation: floatDeskmat 6s ease-in-out infinite;
     }
 
     .deskmat-mockup {
@@ -217,45 +220,36 @@
       border-radius: 18px;
       box-shadow: 
         0 30px 60px -10px rgba(0, 0, 0, 0.8),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.16);
       position: relative;
-      transform: perspective(1000px) rotateX(12deg) rotateY(-8deg) rotateZ(2deg);
-      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform: perspective(1000px) rotateX(14deg) rotateY(-8deg) rotateZ(2deg);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease;
     }
 
     .deskmat-mockup:hover {
-      transform: perspective(1000px) rotateX(4deg) rotateY(-2deg) translateY(-8px);
+      transform: perspective(1000px) rotateX(6deg) rotateY(-3deg) translateY(-8px);
+      box-shadow: 
+        0 40px 70px -10px rgba(0, 0, 0, 0.9),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.25);
     }
 
     .mockup-tag {
       position: absolute;
       top: 16px;
       right: 16px;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(10, 11, 16, 0.85);
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       padding: 6px 14px;
       border-radius: 6px;
       font-size: 10px;
       font-weight: 700;
       letter-spacing: 1.5px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       font-family: monospace;
-      color: #ffffff;
+      color: #e2e8f0;
     }
 
-    /* Floating keyframe */
-    @keyframes floatDeskmat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Scroll Prompt */
+    /* Scroll Prompt & Bounce Keyframe */
     .scroll-down-wrapper {
       display: flex;
       flex-direction: column;
@@ -269,18 +263,18 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      color: #90949d;
+      color: #94a3b8;
       font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
       font-weight: 700;
       text-decoration: none;
-      transition: color 0.2s ease, transform 0.2s ease;
+      transition: color 0.25s ease;
+      cursor: pointer;
     }
 
     .scroll-down-btn:hover {
       color: #ffffff;
-      transform: translateY(2px);
     }
 
     .scroll-icon {
@@ -295,7 +289,7 @@
     }
 
     /* ===================================================
-       DOWNLOAD TARGET SECTION (CERAMIC LIGHT THEME)
+       DOWNLOAD TARGET SECTION (LIGHT CERAMIC THEME)
        =================================================== */
     .download-section {
       background: #ffffff;
@@ -315,7 +309,7 @@
       font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #7b8089;
+      color: #64748b;
       margin-bottom: 8px;
       font-family: monospace;
     }
@@ -324,21 +318,18 @@
       font-size: clamp(24px, 3.8vw, 36px);
       font-weight: 900;
       letter-spacing: -0.6px;
+      color: #0f1117;
     }
 
+    /* Download Card */
     .download-card {
       max-width: 860px;
       margin: 0 auto;
       background: #fafafc;
-      border: 1px solid #e3e5e8;
-      border-radius: 26px;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
       padding: 36px;
-      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.06);
-      transition: box-shadow 0.3s ease;
-    }
-
-    .download-card:hover {
-      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.05);
     }
 
     .apk-card-grid {
@@ -357,7 +348,7 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
       border: 1px solid rgba(0, 0, 0, 0.08);
       overflow: hidden;
     }
@@ -379,9 +370,9 @@
       font-weight: 800;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: #10b981;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #0f172a;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
       padding: 4px 10px;
       border-radius: 6px;
       margin-bottom: 8px;
@@ -396,7 +387,7 @@
     }
 
     .apk-desc {
-      color: #555963;
+      color: #475569;
       font-size: 13.5px;
       line-height: 1.6;
     }
@@ -406,10 +397,10 @@
       flex-wrap: wrap;
       gap: 14px 28px;
       font-size: 12px;
-      color: #727780;
+      color: #64748b;
       margin-bottom: 28px;
       padding-top: 18px;
-      border-top: 1px solid #ebecef;
+      border-top: 1px solid #e2e8f0;
     }
 
     .apk-meta strong {
@@ -417,54 +408,55 @@
     }
 
     .counter-tag {
-      color: #10b981;
+      color: #15803d;
       font-weight: bold;
       font-family: monospace;
     }
 
+    /* Native Download Action Button */
     .download-action-btn {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 12px;
-      background: #0f1117;
+      background: #0f172a;
       color: #ffffff;
       text-decoration: none;
       font-weight: 800;
       font-size: 14px;
       letter-spacing: 0.5px;
       padding: 18px;
-      border-radius: 16px;
-      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-radius: 14px;
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
       cursor: pointer;
       width: 100%;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
     }
 
     .download-action-btn:hover {
-      background: #23262f;
+      background: #1e293b;
       transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.25);
     }
 
     /* ===================================================
-       WHAT'S NEW (RELEASE CHANGELOG)
+       WHAT'S NEW (DARK GLASS CHANGELOG)
        =================================================== */
     .section-wrapper-dark {
       background: #090a0f;
       color: #ffffff;
       padding: 80px 48px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .changelog-box {
       max-width: 860px;
       margin: 0 auto;
-      background: #121318;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 22px;
+      background: rgba(18, 19, 24, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
       padding: 32px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
 
     .changelog-item {
@@ -473,6 +465,7 @@
       margin-bottom: 18px;
       font-size: 14px;
       line-height: 1.6;
+      color: #cbd5e1;
     }
 
     .changelog-item:last-child {
@@ -480,9 +473,9 @@
     }
 
     .changelog-item i {
-      color: #10b981;
-      font-size: 16px;
-      margin-top: 3px;
+      color: #38bdf8;
+      font-size: 15px;
+      margin-top: 4px;
       flex-shrink: 0;
     }
 
@@ -491,7 +484,7 @@
     }
 
     /* ===================================================
-       ABOUT OUR ENGINES
+       ENGINE DIRECTORY CARDS
        =================================================== */
     .engine-grid {
       display: grid;
@@ -502,23 +495,24 @@
     }
 
     .engine-card {
-      background: #121318;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+      background: rgba(18, 19, 24, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
       padding: 24px;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.25s ease, border-color 0.25s ease;
     }
 
     .engine-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.18);
     }
 
     .engine-badge {
       font-family: monospace;
       font-size: 10px;
       font-weight: 800;
-      color: #10b981;
+      color: #38bdf8;
       letter-spacing: 1.5px;
       margin-bottom: 8px;
       text-transform: uppercase;
@@ -533,7 +527,7 @@
 
     .engine-desc {
       font-size: 13px;
-      color: #8e8e93;
+      color: #94a3b8;
       line-height: 1.6;
     }
 
@@ -543,30 +537,30 @@
     footer {
       background: #000000;
       color: #ffffff;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
       padding: 48px 24px 36px;
       text-align: center;
     }
 
     .footer-divider {
-      width: 44px;
+      width: 40px;
       height: 2px;
-      background: #3f3f46;
+      background: #475569;
       margin: 0 auto 20px;
     }
 
     .ownership-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 1.5px;
       margin-bottom: 10px;
       font-family: monospace;
-      color: #ffffff;
+      color: #f1f5f9;
     }
 
     .license-notice {
-      font-size: 12px;
-      color: #8e8e93;
+      font-size: 11.5px;
+      color: #64748b;
       max-width: 580px;
       margin: 0 auto 16px;
       line-height: 1.6;
@@ -574,14 +568,14 @@
 
     .community-tag {
       font-family: monospace;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
-      color: #a1a1aa;
+      color: #94a3b8;
       letter-spacing: 1.5px;
     }
 
     /* ===================================================
-       RESPONSIVE BREAKPOINTS
+       RESPONSIVE ADAPTATIONS
        =================================================== */
     @media (max-width: 900px) {
       .hero-body {
@@ -652,7 +646,7 @@
 </head>
 <body>
 
-  <!-- Top Status Bar Ticker -->
+  <!-- Top System Status Bar -->
   <div class="top-bar">
     <span class="build-status"></span>
     <span>OFFICIAL ARCHIVE • DIRECT ANDROID MANIFEST SYSTEM • CLEAN APK RELEASE</span>
@@ -670,7 +664,7 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Hero Section with 3D Perspective Deskmat Mockup -->
   <section class="hero-section">
     <div class="hero-body">
       <div class="hero-content">
@@ -710,7 +704,7 @@
         </div>
       </div>
 
-      <!-- Graphic Canvas 3D Animated Mockup -->
+      <!-- Graphic Canvas 3D Mockup -->
       <div class="hero-visual">
         <div class="deskmat-mockup">
           <span class="mockup-tag">KRYN UI v1.4.1 STABLE</span>
@@ -718,23 +712,23 @@
       </div>
     </div>
 
-    <!-- Scroll Down Prompt -->
+    <!-- Scroll Down Prompt (Smooth Gliding Trigger with Continuous Bouncing Icon) -->
     <div class="scroll-down-wrapper">
-      <a href="#download-area" class="scroll-down-btn">
+      <a href="#download-area" class="scroll-down-btn" id="scrollPrompt">
         <span>Scroll Down to Download Latest APK</span>
         <i class="fa-solid fa-chevron-down scroll-icon"></i>
       </a>
     </div>
   </section>
 
-  <!-- Download APK Destination (Ceramic Light Theme) -->
+  <!-- Download APK Destination (Reveals on Scroll) -->
   <section class="download-section" id="download-area">
-    <div class="section-header">
+    <div class="section-header reveal-on-scroll">
       <p class="section-eyebrow">READY TO INSTALL</p>
       <h2 class="section-title">Latest Package Release</h2>
     </div>
 
-    <div class="download-card">
+    <div class="download-card reveal-on-scroll">
       <div class="apk-card-grid">
         <div class="apk-icon-box">
           <img src="https://i.ibb.co/35xb1rGV/ic-launcher.png" alt="Kryn UI Logo" />
@@ -756,7 +750,7 @@
         <span>Installs: <span class="counter-tag" id="liveDownloadCount">FETCHING...</span></span>
       </div>
 
-      <!-- Native Direct APK Download Anchor -->
+      <!-- Direct Native Download Anchor -->
       <a href="https://github.com/kryn-joint-labs/kryn-ui/releases/download/latest/kryn-ui-v1.4.1.apk"
          class="download-action-btn"
          id="dlBtn"
@@ -767,40 +761,40 @@
     </div>
   </section>
 
-  <!-- What's New in v1.4.1 Section -->
+  <!-- What's New in v1.4.1 (Reveals on Scroll) -->
   <section class="section-wrapper-dark">
-    <div class="section-header">
-      <p class="section-eyebrow" style="color: #10b981;">RELEASE CHANGELOG</p>
+    <div class="section-header reveal-on-scroll">
+      <p class="section-eyebrow" style="color: #38bdf8;">RELEASE CHANGELOG</p>
       <h2 class="section-title" style="color: #ffffff;">What's New in v1.4.1</h2>
     </div>
 
-    <div class="changelog-box">
+    <div class="changelog-box reveal-on-scroll">
       <div class="changelog-item">
-        <i class="fa-solid fa-check"></i>
+        <i class="fa-solid fa-circle-check"></i>
         <div>
           <strong>New Flagship Drop: KRYN // SOLIS (4x1)</strong> — Horizontal capsule pill widget docking a frictionless native analog clock on an overlapping hexagon dial alongside user-customized text.
         </div>
       </div>
       <div class="changelog-item">
-        <i class="fa-solid fa-check"></i>
+        <i class="fa-solid fa-circle-check"></i>
         <div>
           <strong>24-Hour Daylight Chromatic Matrix (NAP Engine)</strong> — Smooth 48-phase ambient shifts from cosmic midnight obsidian to high-noon porcelain white with solar gold clock hands.
         </div>
       </div>
       <div class="changelog-item">
-        <i class="fa-solid fa-check"></i>
+        <i class="fa-solid fa-circle-check"></i>
         <div>
           <strong>Local Resource Thumbnails</strong> — In-app showcase cards now render directly from local APK drawables, completely eliminating broken image URLs and black placeholder boxes.
         </div>
       </div>
       <div class="changelog-item">
-        <i class="fa-solid fa-check"></i>
+        <i class="fa-solid fa-circle-check"></i>
         <div>
           <strong>In-App Widget Customizer</strong> — Customize text strings, toggle capsule backgrounds, and adjust color presets directly before pinning widgets to the home screen.
         </div>
       </div>
       <div class="changelog-item">
-        <i class="fa-solid fa-check"></i>
+        <i class="fa-solid fa-circle-check"></i>
         <div>
           <strong>Permanent Keystore Signing</strong> — Sealed cryptographic certificates enable seamless in-place updates forever without package conflict errors.
         </div>
@@ -808,16 +802,16 @@
     </div>
   </section>
 
-  <!-- About Section: Kryn UI Engine Directory -->
+  <!-- About Section: Kryn UI Engine Directory (Cards Reveal on Scroll) -->
   <section class="section-wrapper-dark" style="border-top: none; padding-top: 0;">
-    <div class="section-header">
-      <p class="section-eyebrow" style="color: #90949d;">TECHNICAL ARCHITECTURE</p>
+    <div class="section-header reveal-on-scroll">
+      <p class="section-eyebrow" style="color: #94a3b8;">TECHNICAL ARCHITECTURE</p>
       <h2 class="section-title" style="color: #ffffff;">The Kryn UI Engine Directory</h2>
     </div>
 
     <div class="engine-grid">
       <!-- LTC Engine -->
-      <div class="engine-card">
+      <div class="engine-card reveal-on-scroll">
         <div class="engine-badge">LTC ENGINE</div>
         <div class="engine-title">Live Time Counter</div>
         <div class="engine-desc">
@@ -826,7 +820,7 @@
       </div>
 
       <!-- NAP Engine -->
-      <div class="engine-card">
+      <div class="engine-card reveal-on-scroll">
         <div class="engine-badge">NAP ENGINE</div>
         <div class="engine-title">Native Android Progression</div>
         <div class="engine-desc">
@@ -835,7 +829,7 @@
       </div>
 
       <!-- GTBA Engine -->
-      <div class="engine-card">
+      <div class="engine-card reveal-on-scroll">
         <div class="engine-badge">GTBA ENGINE</div>
         <div class="engine-title">Graphics Ticking Background Alarm</div>
         <div class="engine-desc">
@@ -844,7 +838,7 @@
       </div>
 
       <!-- HEC Engine -->
-      <div class="engine-card">
+      <div class="engine-card reveal-on-scroll">
         <div class="engine-badge">HEC ENGINE</div>
         <div class="engine-title">High End Casting</div>
         <div class="engine-desc">
@@ -864,31 +858,70 @@
     <div class="community-tag">FROM THE COMMUNITY TO THE COMMUNITY</div>
   </footer>
 
-  <!-- Persistent Download Counter & APK Trigger Script -->
+  <!-- Scripts: Smooth Scroll Interpolation, Observer Animations, & Download Handler -->
   <script>
     const NAMESPACE = 'kryn-joint-labs-ui';
     const KEY = 'apk-downloads';
     const BASE_URL = 'https://api.counterapi.dev/v1';
 
+    // 1. Smooth Gliding Pull-Down Navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const targetId = this.getAttribute('href');
+        if (targetId && targetId !== '#') {
+          const targetEl = document.querySelector(targetId);
+          if (targetEl) {
+            e.preventDefault();
+            targetEl.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }
+      });
+    });
+
+    // 2. IntersectionObserver to Trigger Smooth Fade-In as You Scroll
+    const observerOptions = {
+      threshold: 0.12,
+      rootMargin: '0px 0px -30px 0px'
+    };
+
+    const scrollObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        scrollObserver.observe(el);
+      });
+      fetchDownloadCount();
+    });
+
+    // 3. Persistent Download Counter
     async function fetchDownloadCount() {
       const counterEl = document.getElementById('liveDownloadCount');
       if (!counterEl) return;
       try {
         const res = await fetch(`${BASE_URL}/${NAMESPACE}/${KEY}`);
         if (!res.ok) {
-          counterEl.innerText = '12+ ACTIVE';
+          counterEl.innerText = '14+ ACTIVE';
           return;
         }
         const data = await res.json();
         const count = data.count || 0;
         counterEl.innerHTML = `${count.toLocaleString()} INSTALLED`;
       } catch (err) {
-        counterEl.innerText = '12+ ACTIVE';
+        counterEl.innerText = '14+ ACTIVE';
       }
     }
 
-    window.addEventListener('DOMContentLoaded', fetchDownloadCount);
-
+    // 4. Download Trigger & Status Animation
     async function handleDownloadEvent() {
       const btn = document.getElementById('dlBtn');
       const counterEl = document.getElementById('liveDownloadCount');
@@ -906,18 +939,18 @@
         }
       } catch (e) {
         if (counterEl) {
-          let current = parseInt(counterEl.innerText.replace(/\D/g, ''), 10) || 12;
+          let current = parseInt(counterEl.innerText.replace(/\D/g, ''), 10) || 14;
           counterEl.innerHTML = `${(current + 1).toLocaleString()} INSTALLED`;
         }
       }
 
       setTimeout(() => {
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Download Started!';
-        btn.style.backgroundColor = '#10b981';
+        btn.style.backgroundColor = '#15803d';
 
         setTimeout(() => {
           btn.innerHTML = originalHTML;
-          btn.style.backgroundColor = '#0f1117';
+          btn.style.backgroundColor = '#0f172a';
         }, 3000);
       }, 600);
     }
