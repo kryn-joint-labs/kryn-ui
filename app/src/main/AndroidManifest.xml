@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
 
-        <!-- KRYN // LUNAR WIDGET PROVIDER -->
+        <!-- KRYN // LUNAR WIDGET PROVIDER (4x2) -->
         <receiver
             android:name=".LunarWidgetReceiver"
             android:exported="true">
@@ -47,6 +47,20 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/velvet_widget_info" />
+        </receiver>
+
+        <!-- KRYN // SOLIS WIDGET PROVIDER (4x1) -->
+        <receiver
+            android:name=".SolisWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/solis_widget_info" />
         </receiver>
 
     </application>
