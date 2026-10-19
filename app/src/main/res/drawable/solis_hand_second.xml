@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="120dp"
-    android:height="120dp"
-    android:viewportWidth="120"
-    android:viewportHeight="120">
-    <!-- Second Needle: Full edge reach to Y=0 with counterbalance tail to Y=80 -->
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+    <!-- Second Needle: Reaches Y=2 with rear counter-balance to Y=98 -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M59.1,0 L60.9,0 L60.9,80 L59.1,80 Z" />
+        android:pathData="M79.2,2 L80.8,2 L80.8,98 L79.2,98 Z" />
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M60,60 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
+        android:pathData="M80,80 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
 </vector>
