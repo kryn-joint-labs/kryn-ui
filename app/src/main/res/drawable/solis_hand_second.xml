@@ -4,14 +4,11 @@
     android:height="120dp"
     android:viewportWidth="120"
     android:viewportHeight="120">
-
-    <!-- Razor-thin Second Hand Needle: 1.2 units wide with counterbalance tail -->
+    <!-- Needle Second Hand: Reaches Y=10 with tail to Y=72, 1.8 units wide -->
     <path
         android:fillColor="#FBBF24"
-        android:pathData="M59.4,8 L60.6,8 L60.6,68 L59.4,68 Z" />
-
-    <!-- Center Pivot Needle Point -->
+        android:pathData="M59.1,10 L60.9,10 L60.9,72 L59.1,72 Z" />
     <path
         android:fillColor="#FBBF24"
-        android:pathData="M60,60 m -2,0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0" />
+        android:pathData="M60,60 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0" />
 </vector>
