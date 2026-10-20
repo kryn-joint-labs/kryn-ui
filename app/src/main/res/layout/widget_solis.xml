@@ -4,41 +4,40 @@
     android:layout_height="match_parent"
     android:padding="2dp">
 
-    <!-- 1. SLIM CAPSULE PILL: Height reduced to 34dp (1/2 original height) -->
+    <!-- 1. CAPSULE PILL BACKGROUND -->
     <ImageView
         android:id="@+id/solis_pill_bg_img"
         android:layout_width="match_parent"
-        android:layout_height="34dp"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="32dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="24dp"
         android:scaleType="fitXY" />
 
-    <!-- 2. CUSTOM TEXT: Scaled & centered inside the slim pill -->
+    <!-- 2. CUSTOM TEXT (BRICK SANS) -->
     <ImageView
         android:id="@+id/solis_custom_text_img"
         android:layout_width="wrap_content"
-        android:layout_height="26dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="80dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="88dp"
         android:adjustViewBounds="true"
         android:scaleType="fitStart" />
 
-    <!-- 3. OVERLAPPING DOCK WITH SHADOW (NO STATIC DRAWABLE OVERRIDE) -->
+    <!-- 3. OVERLAPPING HEXAGON BADGE WITH DROP SHADOW (NO STATIC DRAWABLE OVERRIDE) -->
     <ImageView
         android:id="@+id/solis_hex_bg_img"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
+        android:layout_width="82dp"
+        android:layout_height="82dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:scaleType="fitCenter" />
 
-    <!-- 4. LTC HARDWARE CLOCK: Expanded bounds to show 2x extended hands -->
+    <!-- 4. REAL-TIME HARDWARE ANALOG CLOCK (FULL 82dp CONTAINER FOR EXTENDED HANDS) -->
     <AnalogClock
         android:id="@+id/solis_analog_clock"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
+        android:layout_width="82dp"
+        android:layout_height="82dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:hand_hour="@drawable/solis_hand_hour"
