@@ -213,12 +213,15 @@ class SolisWidgetReceiver : AppWidgetProvider() {
     private fun renderPillBitmap(color: Int): Bitmap {
         val density = 3.5f
         val width = (320 * density).toInt()
-        val height = (64 * density).toInt()
+        val height = (51 * density).toInt() // 0.8x of 64dp
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
+        // Enforce 70% transparency (30% alpha = 77 / 255) while keeping live daytime RGB
+        val translucentColor = ColorUtils.setAlphaComponent(color, 77)
+
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            this.color = color
+            this.color = translucentColor
             style = Paint.Style.FILL
             isDither = true
         }
