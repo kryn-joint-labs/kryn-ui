@@ -17,6 +17,8 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
     companion object {
         const val ACTION_SOLIS_TICK = "com.kryn.ui.ACTION_SOLIS_TICK"
+        // Permanent Dark Black for the Analog Clock Dock
+        const val DOCK_DARK_BLACK = 0xFF08090D.toInt()
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -65,9 +67,14 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             }
         }
 
+        // 1. Brick Sans Custom Text (Keeps dynamic daytime color)
         val textBmp = renderTextBitmap(customText.uppercase(), palette.accentColor, customTypeface)
+
+        // 2. Translucent 0.8x Pill (Enforcing 85% transparency / 15% alpha)
         val pillBmp = if (showBackground) renderPillBitmap(palette.pillColor) else Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-        val hexBmp = renderHexBitmapWithShadow(palette.hexColor)
+
+        // 3. Hexagon Dock locked strictly to Dark Black with Elevation Shadow
+        val hexBmp = renderHexBitmapWithShadow(DOCK_DARK_BLACK)
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_solis)
@@ -78,28 +85,28 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         }
     }
 
-    private data class Palette(val pillColor: Int, val hexColor: Int, val accentColor: Int)
+    private data class Palette(val pillColor: Int, val accentColor: Int)
     private data class Anchor(val minuteOfDay: Int, val palette: Palette)
 
     private fun computeInterpolatedPalette(currentMinute: Int): Palette {
-        // Continuous daylight color progression across 1440 minutes
+        // Continuous daylight progression across 1440 minutes
         val anchors = listOf(
-            // Midnight (01:30 - 02:30): Dark Black Hexagon (#08090D)
-            Anchor(120,  Palette(0xFF07080F.toInt(), 0xFF08090D.toInt(), 0xFF818CF8.toInt())),
-            // Dawn (06:00 - 07:00): Warm Light Orange Hexagon (#FB923C)
-            Anchor(390,  Palette(0xFFFFF7ED.toInt(), 0xFFFB923C.toInt(), 0xFFC2410C.toInt())),
-            // Morning Transition (09:00): Soft Daylight Slate
-            Anchor(540,  Palette(0xFFF8FAFC.toInt(), 0xFF94A3B8.toInt(), 0xFF0284C7.toInt())),
-            // Apex Noon (12:00 - 13:00): Light Grey Hexagon (#D1D5DB)
-            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFFD1D5DB.toInt(), 0xFF1E293B.toInt())),
-            // Late Afternoon (16:00): Warm Glow
-            Anchor(960,  Palette(0xFFFFF1EB.toInt(), 0xFFF97316.toInt(), 0xFF9A3412.toInt())),
-            // Golden Sunset Evening (18:30): Dark Sunset Orange Hexagon (#C2410C)
-            Anchor(1110, Palette(0xFF4A1525.toInt(), 0xFFC2410C.toInt(), 0xFFFDBA74.toInt())),
-            // Twilight (21:00): Shifting to Obsidian
-            Anchor(1260, Palette(0xFF0F0C1B.toInt(), 0xFF171924.toInt(), 0xFF6366F1.toInt())),
-            // Loop Anchor
-            Anchor(1560, Palette(0xFF07080F.toInt(), 0xFF08090D.toInt(), 0xFF818CF8.toInt()))
+            // Midnight (01:30 - 02:30)
+            Anchor(120,  Palette(0xFF07080F.toInt(), 0xFF818CF8.toInt())),
+            // Dawn (06:00 - 07:00): Warm Dawn Glow
+            Anchor(390,  Palette(0xFFFFF7ED.toInt(), 0xFFC2410C.toInt())),
+            // Morning Transition (09:00): Clean Ambient Light
+            Anchor(540,  Palette(0xFFF8FAFC.toInt(), 0xFF0284C7.toInt())),
+            // High Noon (12:00 - 13:00): Bright Luminous Porcelain
+            Anchor(750,  Palette(0xFFFFFFFF.toInt(), 0xFF1E293B.toInt())),
+            // Late Afternoon (16:00): Golden Sun Amber
+            Anchor(960,  Palette(0xFFFFF1EB.toInt(), 0xFF9A3412.toInt())),
+            // Golden Sunset Evening (18:30): Rich Sunset Ember
+            Anchor(1110, Palette(0xFF4A1525.toInt(), 0xFFFDBA74.toInt())),
+            // Twilight (21:00): Deep Night Sky
+            Anchor(1260, Palette(0xFF0F0C1B.toInt(), 0xFF6366F1.toInt())),
+            // Cycle Wrap Anchor
+            Anchor(1560, Palette(0xFF07080F.toInt(), 0xFF818CF8.toInt()))
         )
 
         val adjustedMinute = if (currentMinute < 120) currentMinute + 1440 else currentMinute
@@ -120,7 +127,6 @@ class SolisWidgetReceiver : AppWidgetProvider() {
 
         return Palette(
             pillColor = ColorUtils.blendARGB(fromAnchor.palette.pillColor, toAnchor.palette.pillColor, ratio),
-            hexColor = ColorUtils.blendARGB(fromAnchor.palette.hexColor, toAnchor.palette.hexColor, ratio),
             accentColor = ColorUtils.blendARGB(fromAnchor.palette.accentColor, toAnchor.palette.accentColor, ratio)
         )
     }
@@ -213,12 +219,12 @@ class SolisWidgetReceiver : AppWidgetProvider() {
     private fun renderPillBitmap(color: Int): Bitmap {
         val density = 3.5f
         val width = (320 * density).toInt()
-        val height = (51 * density).toInt() // 0.8x of 64dp
+        val height = (51 * density).toInt() // 0.8x scaled height
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        // Enforce 70% transparency (30% alpha = 77 / 255) while keeping live daytime RGB
-        val translucentColor = ColorUtils.setAlphaComponent(color, 77)
+        // 85% transparency = 15% opacity (38 / 255 alpha)
+        val translucentColor = ColorUtils.setAlphaComponent(color, 38)
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.color = translucentColor
@@ -241,7 +247,7 @@ class SolisWidgetReceiver : AppWidgetProvider() {
         val cy = size / 2f
         val radius = (35 * density)
 
-        // 1. Draw Multi-Layered Drop Shadow (Direct Canvas Alpha Simulation)
+        // Multi-Layered Elevation Drop Shadow cast over the capsule
         for (i in 4 downTo 1) {
             val shadowPath = Path()
             val shadowRadius = radius + (i * 1.5f * density)
@@ -255,13 +261,13 @@ class SolisWidgetReceiver : AppWidgetProvider() {
             shadowPath.close()
 
             val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                this.color = Color.argb(18 / i, 0, 0, 0)
+                this.color = Color.argb(20 / i, 0, 0, 0)
                 style = Paint.Style.FILL
             }
             canvas.drawPath(shadowPath, shadowPaint)
         }
 
-        // 2. Draw Solid Hexagon Base with Dynamic Daylight Color
+        // Solid Dark Black Hexagon base (#08090D)
         val hexPath = Path()
         for (i in 0 until 6) {
             val angle = Math.toRadians((60 * i - 30).toDouble())
